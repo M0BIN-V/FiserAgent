@@ -1,0 +1,6 @@
+@Fiser.Runtime.WebApi_HostAddress = http://localhost:5033
+
+GET {{Fiser.Runtime.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

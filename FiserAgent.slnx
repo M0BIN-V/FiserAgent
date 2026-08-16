@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Fiser.Interfaces/">
+    <Project Path="Fiser.Interfaces/Fiser.Interfaces.TelegramBot/Fiser.Interfaces.TelegramBot.csproj" />
+  </Folder>
+  <Folder Name="/Fiser.Runtime/">
+    <Project Path="Fiser.Runtime/Fiser.Runtime.Core/Fiser.Runtime.Core.csproj" />
+    <Project Path="Fiser.Runtime/Fiser.Runtime.WebApi/Fiser.Runtime.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/Solution items/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="Fiser.Supervisor/Fiser.Supervisor.csproj" />
+</Solution>

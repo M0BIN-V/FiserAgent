@@ -1,0 +1,11 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea
+EventPlatform.sln.DotSettings.user
+opencode.json
+TestResults/
+Generated/
+botConfig.json
