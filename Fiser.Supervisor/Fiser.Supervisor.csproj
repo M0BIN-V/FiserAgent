@@ -5,12 +5,18 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AssemblyName>fiser</AssemblyName>
+        <AssemblyName>Fiser</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Cocona" Version="2.2.0" />
+      <PackageReference Include="OneOf" Version="3.0.271" />
+      <PackageReference Include="OneOf.SourceGenerator" Version="3.0.271" />
       <PackageReference Include="TerminalProgressBar" Version="1.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Settings\" />
     </ItemGroup>
 
 </Project>

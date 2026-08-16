@@ -1,13 +1,11 @@
 ﻿namespace Fiser.Supervisor.Helpers;
 
-
-
 public static class FileHelpers
 {
     public static async Task CopyDirectoryAsync(
         string sourceDirectory,
         string destinationDirectory,
-        IProgress<CopyProgress>? progress = null,
+        IProgress<double>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(sourceDirectory))
@@ -68,19 +66,10 @@ public static class FileHelpers
 
                 copiedBytes += bytesRead;
 
-                progress?.Report(
-                    new CopyProgress(copiedBytes, totalBytes));
+                var percentage = totalBytes == 0 ? 100 : (double)copiedBytes / totalBytes * 100;
+
+                progress?.Report(percentage);
             }
         }
     }
-}
-
-public record CopyProgress(
-    long CopiedBytes,
-    long TotalBytes)
-{
-    public double Percentage =>
-        TotalBytes == 0
-            ? 100
-            : (double)CopiedBytes / TotalBytes * 100;
 }

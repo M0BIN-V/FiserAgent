@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Fiser.Supervisor.Helpers.Tui;
+﻿namespace Fiser.Supervisor.Helpers.Tui;
 
 public static class ConsoleUi
 {
@@ -173,11 +171,14 @@ public static class ConsoleUi
 
         Console.CursorVisible = false;
 
+        var cursorLeft = Console.CursorLeft;
+        var cursorTop = Console.CursorTop;
+
         try
         {
             while (true)
             {
-                Console.Clear();
+                Console.SetCursorPosition(cursorLeft,cursorTop);
 
                 Console.WriteLine(title);
                 Console.WriteLine();
