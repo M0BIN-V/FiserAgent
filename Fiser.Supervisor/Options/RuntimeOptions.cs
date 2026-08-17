@@ -2,7 +2,27 @@
 
 public class RuntimeOptions
 {
-    public string FilePath = Path.Combine(AppContext.BaseDirectory, "Runtime", "Fiser.Runtime.exe");
-    public string FolderPath = Path.Combine(AppContext.BaseDirectory, "Runtime");
-    public string ManifestPath = Path.Combine(AppContext.BaseDirectory, "Runtime", "runtime.json");
+    public RuntimeOptions()
+    {
+        FolderPath = Path.Combine(AppContext.BaseDirectory, FolderName);
+
+        ManifestPath = Path.Combine(FolderPath, ManifestFileName);
+
+        FilePath = Path.Combine(FolderPath, OperatingSystem.IsWindows() ? "Fiser.Runtime.exe" : "Fiser.Runtime");
+
+        ProcessProfile = Path.Combine(FolderPath, "process.profile.json");
+    }
+
+
+    public string FolderName { get; init; } = "Runtime";
+
+    public string ManifestFileName { get; init; } = "manifest.json";
+
+    public string FilePath { get; init; }
+
+    public string ProcessProfile { get; init; }
+
+    public string FolderPath { get; init; }
+
+    public string ManifestPath { get; init; }
 }

@@ -10,8 +10,13 @@ public static class ServiceInstaller
     {
         var services = builder.Services;
 
-        services.AddSingleton<IRuntimeService,DebugRuntimeService>();
-
+        services.AddScoped<IRuntimeService, RuntimeService>();
+        services.AddScoped<RuntimeProcessManager>();
+        services.AddHttpClient<RuntimeProcessManager>(client => client.Timeout = TimeSpan.FromMinutes(5));
+#if DEBUG
+        services.AddScoped<IRuntimeRegistry, DebugRuntimeRegistry>();
+#endif
+        services.AddScoped<IRuntimeProcessProfileService, RuntimeProcessProfileService>();
 
         return builder;
     }

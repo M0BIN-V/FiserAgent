@@ -44,23 +44,22 @@ public sealed class Spinner : IDisposable
         _cts.Dispose();
     }
 
-    private async Task RunAsync(
-        CancellationToken cancellationToken)
+    private async Task RunAsync(CancellationToken cancellationToken)
     {
         var index = 0;
 
         Console.CursorVisible = false;
+        var currentCursorLeft =  Console.CursorLeft;
+        var currentCursorTop = Console.CursorTop;
 
         try
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                Console.Write(
-                    $"\r{Frames[index++ % Frames.Length]} {_message}");
+                
+                Console.Write($"\r{Frames[index++ % Frames.Length]} {_message}");
 
-                await Task.Delay(
-                    80,
-                    cancellationToken);
+                await Task.Delay(80, cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -68,10 +67,7 @@ public sealed class Spinner : IDisposable
         }
         finally
         {
-            Console.Write(
-                "\r" +
-                new string(' ', _message.Length + 3) +
-                "\r");
+            Console.Write("\r" + new string(' ', _message.Length + 3) + "\r");
 
             Console.CursorVisible = true;
         }

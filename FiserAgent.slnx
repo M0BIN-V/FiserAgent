@@ -5,6 +5,7 @@
   <Folder Name="/Fiser.Runtime/">
     <Project Path="Fiser.Runtime/Fiser.Runtime.Core/Fiser.Runtime.Core.csproj" />
     <Project Path="Fiser.Runtime/Fiser.Runtime.WebApi/Fiser.Runtime.WebApi.csproj" />
+    <Project Path="Fiser.Runtime/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Solution items/">
     <File Path=".gitignore" />

@@ -26,18 +26,25 @@ public static class Message
         WriteColored("✗", message, ConsoleColor.Red);
     }
 
-    private static void WriteColored(
+    public static void Disable(string message)
+    {
+        WriteColored("", message, ConsoleColor.DarkGray, ConsoleColor.DarkGray);
+    }
+
+
+    public static void WriteColored(
         string icon,
         string message,
-        ConsoleColor color)
+        ConsoleColor iconColor,
+        ConsoleColor? color = null)
     {
         var oldColor = Console.ForegroundColor;
 
-        Console.ForegroundColor = color;
+        Console.ForegroundColor = iconColor;
         Console.Write($"{icon} ");
 
-        Console.ForegroundColor = oldColor;
+        Console.ForegroundColor = color ?? oldColor;
         Console.WriteLine(message);
+        Console.ResetColor();
     }
-
 }
