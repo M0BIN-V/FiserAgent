@@ -16,7 +16,6 @@ public class MainCommands
 
             if (result is "yes")
             {
-
                 var progressBar = Progress("fetching runtime...");
 
                 await runtimeService.FetchRuntimeAsync(progressBar);
@@ -27,7 +26,5 @@ public class MainCommands
         Success("runtime loaded.");
         
         Info("running runtime...");
-        
-        
     }
 }
