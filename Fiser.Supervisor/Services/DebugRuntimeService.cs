@@ -1,24 +1,56 @@
-﻿using Fiser.Supervisor.Helpers;
+﻿using System.Text.Json;
+using Fiser.Supervisor.Helpers;
 using Fiser.Supervisor.Options;
 using Microsoft.Extensions.Options;
 
 namespace Fiser.Supervisor.Services;
 
-public class DebugRuntimeService(
-    IOptions<RuntimeOptions> runtimeOptions,
-    IOptions<SupervisorOptions> supervisorOptions) : IRuntimeService
+public class DebugRuntimeService : IRuntimeService
 {
-    private readonly RuntimeOptions _runtimeOptions = runtimeOptions.Value;
-    private readonly SupervisorOptions _supervisorOptions = supervisorOptions.Value;
+    private readonly string _runtimeBuildFolder;
+    private readonly RuntimeOptions _runtimeOptions;
+    private readonly SupervisorOptions _supervisorOptions;
+    private readonly string _supervisorProjectPath;
+
+    public DebugRuntimeService(
+        IOptions<RuntimeOptions> runtimeOptions,
+        IOptions<SupervisorOptions> supervisorOptions)
+    {
+        _runtimeOptions = runtimeOptions.Value;
+        _supervisorOptions = supervisorOptions.Value;
+
+        _supervisorProjectPath = Path.Combine(_supervisorOptions.Directory, "..", "..", "..");
+
+        _runtimeBuildFolder = Path.Combine(
+            _supervisorProjectPath,
+            "..",
+            "Fiser.Runtime",
+            "Fiser.Runtime.WebApi",
+            "bin",
+            "Debug",
+            "net10.0");
+    }
 
     public async Task<Version?> GetRuntimeVersionAsync()
     {
-        throw new NotImplementedException();
+        var manifestString = await File.ReadAllTextAsync(_runtimeOptions.ManifestPath);
+
+        if (string.IsNullOrWhiteSpace(manifestString))
+            return null;
+
+        var manifest = JsonSerializer.Deserialize<RuntimeManifest>(manifestString);
+
+        if (manifest is null) return null;
+
+        return new Version(manifest.Version);
     }
 
-    public Version GetLatestRuntimeVersion()
+    public async Task<Version> GetLatestRuntimeVersionAsync()
     {
-        throw new NotImplementedException();
+        var manifestString = await File.ReadAllTextAsync(Path.Combine(_runtimeBuildFolder, "runtime.json"));
+        var manifest = JsonSerializer.Deserialize<RuntimeManifest>(manifestString);
+
+        return new Version(manifest!.Version);
     }
 
     public bool RunIsTimeInstalled()
@@ -40,16 +72,7 @@ public class DebugRuntimeService(
     {
         //Copy runtime exe file from project 
         var runtimeFolder = _runtimeOptions.FolderPath;
-        var supervisorProjectPath = Path.Combine(_supervisorOptions.Directory, "..", "..","..");
-        var runtimeBuildFolder = Path.Combine(
-            supervisorProjectPath,
-            "..",
-            "Fiser.Runtime",
-            "Fiser.Runtime.WebApi",
-            "bin",
-            "Debug",
-            "net10.0");
 
-        await FileHelpers.CopyDirectoryAsync(runtimeBuildFolder, runtimeFolder, progress);
+        await FileHelpers.CopyDirectoryAsync(_runtimeBuildFolder, runtimeFolder, progress);
     }
 }

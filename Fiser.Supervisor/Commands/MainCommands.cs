@@ -20,11 +20,35 @@ public class MainCommands
 
                 await runtimeService.FetchRuntimeAsync(progressBar);
             }
-            else return;
+            else
+            {
+                return;
+            }
+        }
+        else
+        {
+            Info("validating runtime version...");
+            var currentVersion = await runtimeService.GetRuntimeVersionAsync();
+            var latestVersion = await runtimeService.GetLatestRuntimeVersionAsync();
+
+            if (currentVersion < latestVersion)
+            {
+              Warning($"new runtime version is available: {latestVersion}");
+              var result = Select($"do you want to update runtime ? (current version : {currentVersion})", ["yes", "no"]);
+
+              if (result is "yes")
+              {
+                  Info("updating runtime...");
+              }
+            }
+            else
+            {
+                Success("runtime is updated");
+            }
         }
 
         Success("runtime loaded.");
-        
+
         Info("running runtime...");
     }
 }

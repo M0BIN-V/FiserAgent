@@ -3,8 +3,10 @@ namespace Fiser.Supervisor.Services;
 public interface IRuntimeService
 {
     public Task<Version?> GetRuntimeVersionAsync();
-    public Version GetLatestRuntimeVersion();
+
+    public Task<Version> GetLatestRuntimeVersionAsync();
 
     public bool RunIsTimeInstalled();
+
     public Task FetchRuntimeAsync(IProgress<double> progress);
 }
