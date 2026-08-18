@@ -97,7 +97,8 @@ public sealed class RuntimeProcessManager(
         var profile = new RuntimeProcessProfile
         {
             Url = endpoint.Address.ToString(),
-            ProcessId = _process.Id
+            ProcessId = _process.Id,
+            PipeName = Guid.NewGuid().ToString()
         };
 
         await profileService.UpdateProfileAsync(profile, ct);
