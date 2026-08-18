@@ -153,4 +153,9 @@ public sealed class RuntimeProcessManager(
 
         return true;
     }
+
+    public async Task ShutdownAsync()
+    {
+        throw new NotImplementedException();
+    }
 }

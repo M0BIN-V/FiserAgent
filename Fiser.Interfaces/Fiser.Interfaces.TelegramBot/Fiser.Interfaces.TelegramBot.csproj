@@ -8,13 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="TeleFrame" Version="1.3.3" />
+        <PackageReference Include="TeleFrame" Version="1.3.3"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="botConfig.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="botConfig.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

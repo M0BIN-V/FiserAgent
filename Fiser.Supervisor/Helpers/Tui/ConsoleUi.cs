@@ -178,7 +178,7 @@ public static class ConsoleUi
         {
             while (true)
             {
-                Console.SetCursorPosition(cursorLeft,cursorTop);
+                Console.SetCursorPosition(cursorLeft, cursorTop);
 
                 Console.WriteLine(title);
                 Console.WriteLine();

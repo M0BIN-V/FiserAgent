@@ -14,7 +14,6 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
         IOptions<RuntimeOptions> runtimeOptions,
         IOptions<SupervisorOptions> supervisorOptions)
     {
-        
         _runtimeOptions = runtimeOptions.Value;
         var supervisorOptions1 = supervisorOptions.Value;
 

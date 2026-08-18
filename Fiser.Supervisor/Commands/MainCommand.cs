@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using Cocona.Builder;
+using Fiser.Supervisor.Common;
 using Fiser.Supervisor.Options;
 using Fiser.Supervisor.Services;
 using Microsoft.Extensions.Options;
@@ -6,9 +8,15 @@ using static Fiser.Supervisor.Helpers.Tui.Message;
 
 namespace Fiser.Supervisor.Commands;
 
-public class MainCommands
+public class MainCommand : ICommand
 {
-    public async Task Main(
+    public void Map(ICoconaCommandsBuilder builder)
+    {
+        builder.AddCommand(Handler)
+            .WithDescription("main command for handling runtime operations");
+    }
+
+    private static async Task Handler(
         [FromService] IRuntimeService runtimeService,
         [FromService] RuntimeProcessManager runtimeProcessManager,
         [FromService] IRuntimeRegistry registry,

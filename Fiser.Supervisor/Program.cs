@@ -1,16 +1,13 @@
 ﻿using Fiser.Supervisor;
-using Fiser.Supervisor.Commands;
+using Fiser.Supervisor.Common;
 
 var path = Path.Combine();
 
 Console.OutputEncoding = Encoding.Unicode;
 Console.Clear();
 
-var app = CoconaApp
-    .CreateBuilder()
+CoconaApp.CreateBuilder()
     .InstallServices()
-    .Build();
-
-app.AddCommands<MainCommands>();
-
-app.Run();
+    .Build()
+    .MapCommands()
+    .Run();

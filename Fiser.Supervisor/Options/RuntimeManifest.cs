@@ -4,6 +4,5 @@ namespace Fiser.Supervisor.Options;
 
 public class RuntimeManifest
 {
-    [JsonPropertyName("version")]
-    public required string Version {get; set;}
+    [JsonPropertyName("version")] public required string Version { get; set; }
 }

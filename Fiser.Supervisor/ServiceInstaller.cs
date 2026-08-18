@@ -1,4 +1,5 @@
 ﻿using Cocona.Builder;
+using Fiser.Supervisor.Common;
 using Fiser.Supervisor.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +10,8 @@ public static class ServiceInstaller
     public static CoconaAppBuilder InstallServices(this CoconaAppBuilder builder)
     {
         var services = builder.Services;
+
+        services.AddCommands(typeof(ServiceInstaller).Assembly);
 
         services.AddScoped<IRuntimeService, RuntimeService>();
         services.AddScoped<RuntimeProcessManager>();

@@ -1,5 +1,4 @@
-﻿
-namespace Fiser.Supervisor.Services;
+﻿namespace Fiser.Supervisor.Services;
 
 public interface IRuntimeRegistry
 {

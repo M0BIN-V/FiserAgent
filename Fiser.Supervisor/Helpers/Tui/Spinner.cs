@@ -49,14 +49,13 @@ public sealed class Spinner : IDisposable
         var index = 0;
 
         Console.CursorVisible = false;
-        var currentCursorLeft =  Console.CursorLeft;
+        var currentCursorLeft = Console.CursorLeft;
         var currentCursorTop = Console.CursorTop;
 
         try
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                
                 Console.Write($"\r{Frames[index++ % Frames.Length]} {_message}");
 
                 await Task.Delay(80, cancellationToken);
