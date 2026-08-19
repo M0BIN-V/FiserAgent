@@ -7,14 +7,14 @@ namespace Fiser.Supervisor.Services;
 public class RuntimeProcessProfileService(IOptions<RuntimeOptions> options) :
     IRuntimeProcessProfileService
 {
-    public bool ProfileExistsAsync()
+    public bool ProfileExists()
     {
         return File.Exists(options.Value.ProcessProfile);
     }
 
-    public async Task<RuntimeProcessProfile> GetProfileAsync()
+    public async Task<RuntimeProcessProfile> GetProfileAsync(CancellationToken ct)
     {
-        var profileStr = await File.ReadAllTextAsync(options.Value.ProcessProfile);
+        var profileStr = await File.ReadAllTextAsync(options.Value.ProcessProfile, ct);
         var profile = JsonSerializer.Deserialize<RuntimeProcessProfile>(profileStr);
 
         return profile ?? throw new NullReferenceException("No profile found");

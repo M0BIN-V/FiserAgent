@@ -56,7 +56,7 @@ public class MainCommand : ICommand
 
         Success($"runtime v{await runtimeService.GetRuntimeVersionAsync()} loaded.");
 
-        if (!await runtimeProcessManager.IsRunningAsync())
+        if (!await runtimeProcessManager.IsRunningAsync(CancellationToken.None))
             using (StartSpinner("running runtime"))
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -64,11 +64,19 @@ public class MainCommand : ICommand
                 await runtimeProcessManager.StartAsync(runtimeOptions.Value.FilePath, timeout.Token);
             }
 
+        while (true)
+        {
+            var canRead = runtimeProcessManager.Output.Reader.TryRead(out var line);
+            if (!canRead) break;
+
+            Disable(line ?? " ");
+        }
+
         var endpoint = new RuntimeEndpoint(new Uri(
             JsonSerializer.Deserialize<RuntimeProcessProfile>(
                 await File.ReadAllTextAsync(runtimeOptions.Value.ProcessProfile))!.Url));
 
-        if (await runtimeProcessManager.RespondsHealthyAsync())
+        if (await runtimeProcessManager.RespondsHealthyAsync(CancellationToken.None))
             Success($"runtime started on {endpoint.Address}");
         else
             Error("runtime failure!");

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Threading.Channels;
+using Fiser.Supervisor.Helpers.Tui;
 using Fiser.Supervisor.Options;
 
 namespace Fiser.Supervisor.Services;
@@ -9,6 +10,7 @@ public sealed record RuntimeEndpoint(Uri Address);
 
 public sealed class RuntimeProcessManager(
     IRuntimeProcessProfileService profileService,
+    RuntimePipeClient pipeClient,
     HttpClient httpClient) : IDisposable
 {
     private readonly Channel<string> _output = Channel.CreateUnbounded<string>();
@@ -22,19 +24,16 @@ public sealed class RuntimeProcessManager(
         _process?.Dispose();
     }
 
-    public static bool IsProcessRunning(
-        int processId,
-        string expectedName)
+    public static bool IsProcessRunning(int processId, string expectedName)
     {
         try
         {
             using var process = Process.GetProcessById(processId);
 
-            return !process.HasExited &&
-                   string.Equals(
-                       process.ProcessName,
-                       expectedName,
-                       StringComparison.OrdinalIgnoreCase);
+            return !process.HasExited && string.Equals(
+                process.ProcessName,
+                expectedName,
+                StringComparison.OrdinalIgnoreCase);
         }
         catch (ArgumentException)
         {
@@ -42,32 +41,34 @@ public sealed class RuntimeProcessManager(
         }
     }
 
-    public async Task<bool> IsRunningAsync()
+    public async Task<bool> IsRunningAsync(CancellationToken ct)
     {
-        if (!profileService.ProfileExistsAsync()) return false;
+        if (!profileService.ProfileExists()) return false;
 
-        var runtimeProfile = await profileService.GetProfileAsync();
+        var runtimeProfile = await profileService.GetProfileAsync(ct);
 
         return IsProcessRunning(runtimeProfile.ProcessId, "Fiser.Runtime") &&
-               await RespondsHealthyAsync();
+               await RespondsHealthyAsync(ct);
     }
 
-    public async Task<bool> RespondsHealthyAsync()
+    public async Task<bool> RespondsHealthyAsync(CancellationToken ct)
     {
-        var profile = await profileService.GetProfileAsync();
+        var profile = await profileService.GetProfileAsync(ct);
 
         var baseUrl = new Uri(profile.Url);
 
         var aliveUrl = new Uri(baseUrl, "alive");
 
-        var response = await httpClient.GetAsync(aliveUrl);
+        var response = await httpClient.GetAsync(aliveUrl, ct);
 
         return response.StatusCode is HttpStatusCode.OK;
     }
 
     public async Task StartAsync(string filePath, CancellationToken ct = default)
     {
-        if (await IsRunningAsync()) throw new InvalidOperationException("Runtime is already running.");
+        if (await IsRunningAsync(ct)) throw new InvalidOperationException("Runtime is already running.");
+
+        var pipeName = $"fiser-runtime-{Guid.NewGuid():N}";
 
         var startInfo = new ProcessStartInfo
         {
@@ -77,6 +78,8 @@ public sealed class RuntimeProcessManager(
             RedirectStandardError = true,
             CreateNoWindow = true
         };
+
+        startInfo.Environment["PIPE_NAME"] = pipeName;
 
         _process = new Process
         {
@@ -92,13 +95,15 @@ public sealed class RuntimeProcessManager(
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
 
+        // await pipeClient.ConnectAsync(pipeName, ct);
+
         var endpoint = await WaitForEndpointAsync(ct);
 
         var profile = new RuntimeProcessProfile
         {
             Url = endpoint.Address.ToString(),
             ProcessId = _process.Id,
-            PipeName = Guid.NewGuid().ToString()
+            PipeName = pipeName
         };
 
         await profileService.UpdateProfileAsync(profile, ct);
@@ -155,8 +160,16 @@ public sealed class RuntimeProcessManager(
         return true;
     }
 
-    public async Task ShutdownAsync()
+    public async Task ShutdownAsync(CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Message.Disable("reading profile");
+        var profile = await profileService.GetProfileAsync(ct);
+        
+        Message.Disable($"connecting to runtime pipe on : {profile.PipeName}");
+        await pipeClient.ConnectAsync(profile.PipeName, ct);
+        
+        Message.Disable("sending shutdown command");
+        await pipeClient.ShutdownAsync(ct);
+        await pipeClient.DisposeAsync();
     }
 }

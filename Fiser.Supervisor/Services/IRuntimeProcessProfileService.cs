@@ -4,7 +4,7 @@ namespace Fiser.Supervisor.Services;
 
 public interface IRuntimeProcessProfileService
 {
-    bool ProfileExistsAsync();
+    bool ProfileExists();
     Task UpdateProfileAsync(RuntimeProcessProfile profile, CancellationToken ct);
-    Task<RuntimeProcessProfile> GetProfileAsync();
+    Task<RuntimeProcessProfile> GetProfileAsync(CancellationToken ct);
 }

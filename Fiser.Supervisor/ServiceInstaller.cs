@@ -2,6 +2,7 @@
 using Fiser.Supervisor.Common;
 using Fiser.Supervisor.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Fiser.Supervisor;
 
@@ -11,8 +12,11 @@ public static class ServiceInstaller
     {
         var services = builder.Services;
 
+        services.AddLogging(logging => { logging.AddFilter("System.Net.Http.HttpClient", LogLevel.None); });
+
         services.AddCommands(typeof(ServiceInstaller).Assembly);
 
+        services.AddSingleton<RuntimePipeClient>();
         services.AddScoped<IRuntimeService, RuntimeService>();
         services.AddScoped<RuntimeProcessManager>();
         services.AddHttpClient<RuntimeProcessManager>(client => client.Timeout = TimeSpan.FromMinutes(5));
