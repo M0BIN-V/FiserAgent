@@ -1,14 +1,17 @@
 <Solution>
     <Folder Name="/Fiser.Interfaces/">
-        <Project Path="Fiser.Interfaces/Fiser.Interfaces.TelegramBot/Fiser.Interfaces.TelegramBot.csproj"/>
+        <Project Path="Fiser.Interfaces/Fiser.Interfaces.TelegramBot/Fiser.Interfaces.TelegramBot.csproj" />
     </Folder>
     <Folder Name="/Fiser.Runtime/">
-        <Project Path="Fiser.Runtime/Fiser.Runtime.Core/Fiser.Runtime.Core.csproj"/>
-        <Project Path="Fiser.Runtime/Fiser.Runtime.WebApi/Fiser.Runtime.WebApi.csproj"/>
-        <Project Path="Fiser.Runtime/ServiceDefaults/ServiceDefaults.csproj"/>
+        <Project Path="Fiser.Runtime/Fiser.Runtime.Core/Fiser.Runtime.Core.csproj" />
+        <Project Path="Fiser.Runtime/Fiser.Runtime.WebApi/Fiser.Runtime.WebApi.csproj" />
+        <Project Path="Fiser.Runtime/ServiceDefaults/ServiceDefaults.csproj" />
+        <Project Path="Fiser.Runtime/TMPTest/TMPTest.csproj" />
+    </Folder>
+    <Folder Name="/Fiser.Supervisor/">
+        <Project Path="Fiser.Supervisor/Fiser.Supervisor.Cli/Fiser.Supervisor.Cli.csproj" />
     </Folder>
     <Folder Name="/Solution items/">
-        <File Path=".gitignore"/>
+        <File Path=".gitignore" />
     </Folder>
-    <Project Path="Fiser.Supervisor/Fiser.Supervisor.csproj"/>
 </Solution>
