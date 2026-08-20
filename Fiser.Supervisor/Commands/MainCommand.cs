@@ -43,6 +43,15 @@ public class MainCommand : ICommand
                 Warning($"new runtime version is available: {latestVersion}");
                 var result = Select($"do you want to update runtime ? (current version : {currentVersion})",
                     ["yes", "no"]);
+                
+                if(runtimeProcessManager.IsRunningAsync(CancellationToken.None).Result)
+                {
+                    using ( StartSpinner("shutting down runtime"))
+                    {
+                        await runtimeProcessManager.ShutdownAsync(CancellationToken.None);
+                    }
+                    return;
+                }
 
                 if (result is "yes") Info("updating runtime...");
                 var progressBar = Progress("fetching runtime...");
