@@ -2,49 +2,62 @@
 
 public static class Message
 {
-    // ─────────────────────────────────────────────
-    // Messages
-    // ─────────────────────────────────────────────
-
-    public static void Info(string message)
+    public static void Info(string message, bool goToNextLine = true)
     {
-        WriteColored("ⓘ", message, ConsoleColor.Cyan);
+        WriteWithIcon("ⓘ", message, ConsoleColor.Cyan, goToNextLine: goToNextLine);
     }
 
-    public static void Success(string message)
+    public static void Success(string message, bool goToNextLine = true)
     {
-        WriteColored("✓", message, ConsoleColor.Green);
+        WriteWithIcon("✓", message, ConsoleColor.Green, goToNextLine: goToNextLine);
     }
 
-    public static void Warning(string message)
+    public static void Warning(string message, bool goToNextLine = true)
     {
-        WriteColored("‼", message, ConsoleColor.Yellow);
+        WriteWithIcon("‼", message, ConsoleColor.Yellow, goToNextLine: goToNextLine);
     }
 
-    public static void Error(string message)
+    public static void Error(string message, bool goToNextLine = true)
     {
-        WriteColored("✗", message, ConsoleColor.Red);
+        WriteWithIcon("✗", message, ConsoleColor.Red, goToNextLine: goToNextLine);
     }
 
-    public static void Disable(string message)
+    public static void Disable(string message, bool goToNextLine = true)
     {
-        WriteColored("", message, ConsoleColor.DarkGray, ConsoleColor.DarkGray);
+        WriteWithIcon("", message, ConsoleColor.DarkGray, ConsoleColor.DarkGray, goToNextLine);
     }
 
-
-    public static void WriteColored(
-        string icon,
-        string message,
-        ConsoleColor iconColor,
-        ConsoleColor? color = null)
+    public static void WriteLine(string message, ConsoleColor? color = null)
     {
         var oldColor = Console.ForegroundColor;
 
-        Console.ForegroundColor = iconColor;
-        Console.Write($"{icon} ");
+        if (color is not null) Console.ForegroundColor = color.Value;
 
-        Console.ForegroundColor = color ?? oldColor;
         Console.WriteLine(message);
-        Console.ResetColor();
+
+        Console.ForegroundColor = oldColor;
+    }
+
+    public static void Write(string message, ConsoleColor? color = null)
+    {
+        var oldColor = Console.ForegroundColor;
+
+        if (color is not null) Console.ForegroundColor = color.Value;
+
+        Console.Write(message);
+
+        Console.ForegroundColor = oldColor;
+    }
+
+    public static void WriteWithIcon(
+        string icon,
+        string message,
+        ConsoleColor iconColor,
+        ConsoleColor? messageColor = null, bool goToNextLine = true)
+    {
+        Write($"{icon} ", iconColor);
+
+        if (goToNextLine) WriteLine(message, messageColor);
+        else Write(message, messageColor);
     }
 }

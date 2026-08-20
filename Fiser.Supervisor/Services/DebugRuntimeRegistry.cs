@@ -31,7 +31,6 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
 
     public async Task<Version> GetLatestRuntimeVersionAsync()
     {
-        var runtimeFolder = _runtimeOptions.FolderPath;
         var runtimeBuildManifest = Path.Combine(_runtimeBuildFolder, _runtimeOptions.ManifestFileName);
 
         var manifestString = await File.ReadAllTextAsync(runtimeBuildManifest);
