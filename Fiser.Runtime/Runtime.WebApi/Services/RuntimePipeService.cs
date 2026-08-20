@@ -1,6 +1,6 @@
 ﻿using System.IO.Pipes;
 
-namespace Fiser.Runtime.WebApi.Services;
+namespace Runtime.WebApi.Services;
 
 public sealed class RuntimePipeService(
     IConfiguration config,
