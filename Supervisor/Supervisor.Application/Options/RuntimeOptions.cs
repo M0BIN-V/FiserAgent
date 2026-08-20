@@ -1,4 +1,4 @@
-﻿namespace Supervisor.Cli.Options;
+﻿namespace Supervisor.Application.Options;
 
 public class RuntimeOptions
 {

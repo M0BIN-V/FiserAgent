@@ -1,4 +1,4 @@
-namespace Fiser.Supervisor.Cli.Services;
+namespace Supervisor.Application.Contracts;
 
 public interface IRuntimeService
 {

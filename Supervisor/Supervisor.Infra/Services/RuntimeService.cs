@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
-using Fiser.Supervisor.Cli.Services;
 using Microsoft.Extensions.Options;
-using Supervisor.Cli.Options;
+using Supervisor.Application.Contracts;
+using Supervisor.Application.Options;
 
-namespace Supervisor.Cli.Services;
+namespace Supervisor.Infra.Services;
 
 public class RuntimeService(IOptions<RuntimeOptions> runtimeOptions) : IRuntimeService
 {

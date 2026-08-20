@@ -1,10 +1,15 @@
-﻿using Supervisor.Cli;
+﻿using Microsoft.Extensions.Logging;
+using Supervisor.Cli;
 using Supervisor.Cli.Application.Common;
 
 Console.OutputEncoding = Encoding.Unicode;
 
-CoconaApp.CreateBuilder()
-    .InstallServices()
+var builder = CoconaApp.CreateBuilder()
+    .InstallServices();
+
+builder.Logging.SetMinimumLevel(LogLevel.Error);
+
+builder
     .Build()
     .MapCommands()
     .Run();

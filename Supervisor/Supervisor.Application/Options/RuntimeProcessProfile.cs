@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Supervisor.Cli.Options;
+namespace Supervisor.Application.Options;
 
 public class RuntimeProcessProfile
 {

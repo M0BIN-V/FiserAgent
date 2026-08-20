@@ -1,9 +1,11 @@
 ﻿using Cocona.Builder;
-using Fiser.Supervisor.Cli.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Supervisor.Application.Contracts;
+using Supervisor.Application.Features.Shutdown;
+using Supervisor.Application.Services;
 using Supervisor.Cli.Application.Common;
-using Supervisor.Cli.Services;
+using Supervisor.Infra.Services;
 
 namespace Supervisor.Cli;
 
@@ -16,6 +18,8 @@ public static class ServiceInstaller
         services.AddLogging(logging => { logging.AddFilter("System.Net.Http.HttpClient", LogLevel.None); });
 
         services.AddCommands(typeof(ServiceInstaller).Assembly);
+
+        services.AddScoped<ShutdownHandler>();
 
         services.AddSingleton<RuntimePipeClient>();
         services.AddScoped<IRuntimeService, RuntimeService>();

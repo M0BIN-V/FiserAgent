@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Threading.Channels;
-using Fiser.Supervisor.Cli.Services;
-using Supervisor.Cli.Options;
+using Supervisor.Application.Contracts;
+using Supervisor.Application.Options;
 
-namespace Supervisor.Cli.Services;
+namespace Supervisor.Application.Services;
 
 public sealed record RuntimeEndpoint(Uri Address);
 
@@ -162,13 +162,10 @@ public sealed class RuntimeProcessManager(
 
     public async Task ShutdownAsync(CancellationToken ct)
     {
-        Disable("reading profile");
         var profile = await profileService.GetProfileAsync(ct);
 
-        Disable($"connecting to runtime pipe on : {profile.PipeName}");
         await pipeClient.ConnectAsync(profile.PipeName, ct);
 
-        Disable("sending shutdown command");
         await pipeClient.ShutdownAsync(ct);
         await pipeClient.DisposeAsync();
     }

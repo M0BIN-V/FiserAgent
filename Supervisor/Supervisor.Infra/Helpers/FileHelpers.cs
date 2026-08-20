@@ -1,4 +1,4 @@
-﻿namespace Supervisor.Cli.Helpers;
+﻿namespace Supervisor.Infra.Helpers;
 
 public static class FileHelpers
 {

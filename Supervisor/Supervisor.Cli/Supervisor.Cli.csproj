@@ -10,16 +10,17 @@
 
     <ItemGroup>
         <PackageReference Include="Cocona" Version="2.2.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11"/>
         <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11"/>
-        <PackageReference Include="OneOf" Version="3.0.271"/>
-        <PackageReference Include="OneOf.SourceGenerator" Version="3.0.271"/>
         <PackageReference Include="TerminalProgressBar" Version="1.2.0"/>
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Application\" />
-      <Folder Include="Infra\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Supervisor.Application\Supervisor.Application.csproj" />
+      <ProjectReference Include="..\Supervisor.Infra\Supervisor.Infra.csproj" />
     </ItemGroup>
 
 </Project>

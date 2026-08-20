@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
-using Fiser.Supervisor.Cli.Services;
 using Microsoft.Extensions.Options;
-using Supervisor.Cli.Helpers;
-using Supervisor.Cli.Options;
+using Supervisor.Application.Contracts;
+using Supervisor.Application.Options;
+using Supervisor.Infra.Helpers;
 
-namespace Supervisor.Cli.Services;
+namespace Supervisor.Infra.Services;
 
 public class DebugRuntimeRegistry : IRuntimeRegistry
 {

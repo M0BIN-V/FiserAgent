@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Cocona.Builder;
-using Fiser.Supervisor.Cli.Services;
 using Microsoft.Extensions.Options;
+using Supervisor.Application.Contracts;
+using Supervisor.Application.Options;
+using Supervisor.Application.Services;
 using Supervisor.Cli.Application.Common;
-using Supervisor.Cli.Options;
-using Supervisor.Cli.Services;
 
 namespace Supervisor.Cli.Application.Commands;
 

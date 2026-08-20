@@ -1,6 +1,7 @@
 ﻿using System.IO.Pipes;
+using System.Text;
 
-namespace Fiser.Supervisor.Cli.Services;
+namespace Supervisor.Application.Services;
 
 public sealed class RuntimePipeClient
 {
