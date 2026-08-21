@@ -1,6 +1,6 @@
 ﻿using Supervisor.Application.Features.Runtime.GetRuntimeStatus;
 
-namespace Supervisor.Cli.Application.Commands;
+namespace Supervisor.Cli.Commands;
 
 public class StatusCommand : ICommand
 {
@@ -28,6 +28,6 @@ public class StatusCommand : ICommand
                 Info("Runtime status:", false);
                 Write($" {statusText}", status.IsRunning ? ConsoleColor.Green : ConsoleColor.Red);
             })
-            .WithDescription("Get the current status of services");
+            .WithDescription("get the current status of services");
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Supervisor.Application.Features.Shutdown;
 
-namespace Supervisor.Cli.Application.Commands;
+namespace Supervisor.Cli.Commands;
 
 public class ShutdownCommand : ICommand
 {

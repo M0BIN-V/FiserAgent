@@ -1,4 +1,4 @@
-﻿namespace Supervisor.Cli.Application.Commands.Interfaces;
+﻿namespace Supervisor.Cli.Commands.Interfaces;
 
 public class ChatInterface
 {

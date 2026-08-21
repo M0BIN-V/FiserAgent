@@ -23,8 +23,9 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
         _runtimeBuildFolder = Path.Combine(
             supervisorProjectPath,
             "..",
-            "Fiser.Runtime",
-            "Fiser.Runtime.WebApi",
+            "..",
+            "Runtime",
+            "Runtime.WebApi",
             "bin",
             "Debug",
             "net10.0");

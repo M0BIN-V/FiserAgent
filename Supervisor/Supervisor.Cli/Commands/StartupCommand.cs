@@ -2,12 +2,10 @@
 using Supervisor.Application.Features.Runtime.GetRuntimeStatus;
 using Supervisor.Application.Features.Runtime.InstallRuntime;
 using Supervisor.Application.Features.Runtime.StartRuntime;
-using Supervisor.Application.Features.Shutdown;
-using Supervisor.Application.Services;
 
-namespace Supervisor.Cli.Application.Commands;
+namespace Supervisor.Cli.Commands;
 
-public class MainCommand : ICommand
+public class StartupCommand : ICommand
 {
     public void Map(ICoconaCommandsBuilder builder)
     {
@@ -16,10 +14,8 @@ public class MainCommand : ICommand
     }
 
     private static async Task Handler(
-        [FromService] ShutdownHandler shutdownHandler,
         [FromService] GetRuntimeStatusHandler runtimeStatusHandler,
         [FromService] StartRuntimeHandler startHandler,
-        [FromService] RuntimeProcessManager runtimeProcessManager,
         [FromService] InstallRuntimeHandler installHandler,
         [FromService] GetLatestVersionHandler getLatestVersionHandler)
     {
