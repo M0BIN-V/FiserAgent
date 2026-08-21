@@ -27,9 +27,7 @@ public class StartRuntimeHandler(
         var profile = await profileService.GetProfileAsync(ct);
 
         if (!await runtimeProcessManager.RespondsHealthyAsync(CancellationToken.None))
-        {
             throw new Exception("Runtime did not respond healthy after starting.");
-        }
 
         return new StartRuntimeResponse(new Uri(profile.Url));
     }

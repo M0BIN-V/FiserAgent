@@ -21,7 +21,7 @@ public class MainCommand : ICommand
         [FromService] StartRuntimeHandler startHandler,
         [FromService] RuntimeProcessManager runtimeProcessManager,
         [FromService] InstallRuntimeHandler installHandler,
-        GetLatestVersionHandler getLatestVersionHandler)
+        [FromService] GetLatestVersionHandler getLatestVersionHandler)
     {
         var (installed, installedRuntimeVersion, _) = await runtimeStatusHandler
             .HandleAsync(new GetRuntimeStatusRequest());
@@ -29,7 +29,7 @@ public class MainCommand : ICommand
         var latestVersionResult = await getLatestVersionHandler.HandleAsync(new GetLatestVersionRequest());
 
         var latestVersion = latestVersionResult.Version;
-        
+
         if (!installed)
         {
             var progressBar = Progress("installing runtime...");

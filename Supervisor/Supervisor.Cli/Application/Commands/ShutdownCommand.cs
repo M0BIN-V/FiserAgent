@@ -1,6 +1,4 @@
-﻿using Cocona.Builder;
-using Supervisor.Application.Features.Shutdown;
-using Supervisor.Cli.Application.Common;
+﻿using Supervisor.Application.Features.Shutdown;
 
 namespace Supervisor.Cli.Application.Commands;
 

@@ -15,12 +15,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\" />
+        <Folder Include="Application\"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Supervisor.Application\Supervisor.Application.csproj" />
-      <ProjectReference Include="..\Supervisor.Infra\Supervisor.Infra.csproj" />
+        <ProjectReference Include="..\Supervisor.Application\Supervisor.Application.csproj"/>
+        <ProjectReference Include="..\Supervisor.Infra\Supervisor.Infra.csproj"/>
     </ItemGroup>
 
 </Project>
