@@ -1,6 +1,6 @@
-﻿using Supervisor.Application.Options;
+﻿using Supervisor.Application.Common.Options;
 
-namespace Supervisor.Application.Contracts;
+namespace Supervisor.Application.Common.Contracts;
 
 public interface IRuntimeProcessProfileService
 {

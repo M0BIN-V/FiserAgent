@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using Cocona.Builder;
 using Microsoft.Extensions.Options;
-using Supervisor.Application.Contracts;
-using Supervisor.Application.Options;
+using Supervisor.Application.Common.Contracts;
+using Supervisor.Application.Common.Options;
 using Supervisor.Application.Services;
 using Supervisor.Cli.Application.Common;
 

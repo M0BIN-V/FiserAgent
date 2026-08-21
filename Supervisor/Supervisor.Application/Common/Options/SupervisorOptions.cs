@@ -1,4 +1,4 @@
-﻿namespace Supervisor.Application.Options;
+﻿namespace Supervisor.Application.Common.Options;
 
 public class SupervisorOptions
 {

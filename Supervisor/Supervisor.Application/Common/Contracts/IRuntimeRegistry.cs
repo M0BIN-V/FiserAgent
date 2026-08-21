@@ -1,4 +1,4 @@
-﻿namespace Supervisor.Application.Contracts;
+﻿namespace Supervisor.Application.Common.Contracts;
 
 public interface IRuntimeRegistry
 {

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Options;
-using Supervisor.Application.Contracts;
-using Supervisor.Application.Options;
+using Supervisor.Application.Common.Contracts;
+using Supervisor.Application.Common.Options;
 using Supervisor.Infra.Helpers;
 
 namespace Supervisor.Infra.Services;

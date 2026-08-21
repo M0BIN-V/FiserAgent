@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Supervisor.Application.Options;
+namespace Supervisor.Application.Common.Options;
 
 public class RuntimeManifest
 {

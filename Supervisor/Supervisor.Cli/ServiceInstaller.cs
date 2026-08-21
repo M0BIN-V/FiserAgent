@@ -1,7 +1,7 @@
 ﻿using Cocona.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Supervisor.Application.Contracts;
+using Supervisor.Application.Common.Contracts;
 using Supervisor.Application.Features.Shutdown;
 using Supervisor.Application.Services;
 using Supervisor.Cli.Application.Common;

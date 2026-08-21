@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Threading.Channels;
-using Supervisor.Application.Contracts;
-using Supervisor.Application.Options;
+using Supervisor.Application.Common.Contracts;
+using Supervisor.Application.Common.Options;
 
 namespace Supervisor.Application.Services;
 
