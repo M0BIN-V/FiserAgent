@@ -3,5 +3,5 @@
 public interface IRuntimeRegistry
 {
     public Task<Version> GetLatestRuntimeVersionAsync();
-    public Task FetchRuntimeAsync(IProgress<double> progress);
+    public Task FetchRuntimeAsync(Version version, IProgress<double>? progress = null);
 }

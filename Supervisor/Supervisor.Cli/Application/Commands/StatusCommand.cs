@@ -1,6 +1,4 @@
-﻿using Cocona.Builder;
-using Supervisor.Application.Services;
-using Supervisor.Cli.Application.Common;
+﻿using Supervisor.Application.Features.Runtime.GetRuntimeStatus;
 
 namespace Supervisor.Cli.Application.Commands;
 
@@ -8,19 +6,27 @@ public class StatusCommand : ICommand
 {
     public void Map(ICoconaCommandsBuilder builder)
     {
-        builder.AddCommand("status", async (RuntimeProcessManager runtimeManager) =>
+        builder.AddCommand("status", async (GetRuntimeStatusHandler handler) =>
             {
-                string status;
+                GetRuntimeStatusResponse status;
                 using (StartSpinner("Checking runtime status..."))
                 {
                     var ctSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                    var runtimeIsRunning = await runtimeManager.IsRunningAsync(ctSource.Token);
 
-                    status = runtimeIsRunning ? "[RUNNING]" : "[NOT RUNNING]";
+                    status = await handler
+                        .HandleAsync(new GetRuntimeStatusRequest(), ctSource.Token);
                 }
 
+                if (!status.Installed)
+                {
+                    Info("Runtime status:", false);
+                    Write(" [NOT INSTALLED]", ConsoleColor.Yellow);
+                    return;
+                }
+
+                var statusText = status.IsRunning ? "[RUNNING]" : "[NOT RUNNING]";
                 Info("Runtime status:", false);
-                Write($" {status}", status == "[RUNNING]" ? ConsoleColor.Green : ConsoleColor.Red);
+                Write($" {statusText}", status.IsRunning ? ConsoleColor.Green : ConsoleColor.Red);
             })
             .WithDescription("Get the current status of services");
     }

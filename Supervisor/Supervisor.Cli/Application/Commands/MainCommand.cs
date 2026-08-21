@@ -1,10 +1,9 @@
-﻿using System.Text.Json;
-using Cocona.Builder;
-using Microsoft.Extensions.Options;
-using Supervisor.Application.Common.Contracts;
-using Supervisor.Application.Common.Options;
+﻿using Supervisor.Application.Features.Runtime.GetLatestVersion;
+using Supervisor.Application.Features.Runtime.GetRuntimeStatus;
+using Supervisor.Application.Features.Runtime.InstallRuntime;
+using Supervisor.Application.Features.Runtime.StartRuntime;
+using Supervisor.Application.Features.Shutdown;
 using Supervisor.Application.Services;
-using Supervisor.Cli.Application.Common;
 
 namespace Supervisor.Cli.Application.Commands;
 
@@ -17,78 +16,45 @@ public class MainCommand : ICommand
     }
 
     private static async Task Handler(
-        [FromService] IRuntimeService runtimeService,
+        [FromService] ShutdownHandler shutdownHandler,
+        [FromService] GetRuntimeStatusHandler runtimeStatusHandler,
+        [FromService] StartRuntimeHandler startHandler,
         [FromService] RuntimeProcessManager runtimeProcessManager,
-        [FromService] IRuntimeRegistry registry,
-        [FromService] IOptions<RuntimeOptions> runtimeOptions)
+        [FromService] InstallRuntimeHandler installHandler,
+        GetLatestVersionHandler getLatestVersionHandler)
     {
-        Info("loading runtime...");
+        var (installed, installedRuntimeVersion, _) = await runtimeStatusHandler
+            .HandleAsync(new GetRuntimeStatusRequest());
 
-        var runtimeInstalled = runtimeService.RunIsTimeInstalled();
-        if (!runtimeInstalled)
+        var latestVersionResult = await getLatestVersionHandler.HandleAsync(new GetLatestVersionRequest());
+
+        var latestVersion = latestVersionResult.Version;
+        
+        if (!installed)
         {
-            Info("runtime not installed.");
-            var progressBar = Progress("fetching runtime...");
-
-            await registry.FetchRuntimeAsync(progressBar);
-        }
-        else
-        {
-            Info("validating runtime version...");
-            var currentVersion = await runtimeService.GetRuntimeVersionAsync();
-            var latestVersion = await registry.GetLatestRuntimeVersionAsync();
-
-            if (currentVersion < latestVersion)
-            {
-                Warning($"new runtime version is available: {latestVersion}");
-                var result = Select($"do you want to update runtime ? (current version : {currentVersion})",
-                    ["yes", "no"]);
-
-                if (runtimeProcessManager.IsRunningAsync(CancellationToken.None).Result)
-                {
-                    using (StartSpinner("shutting down runtime"))
-                    {
-                        await runtimeProcessManager.ShutdownAsync(CancellationToken.None);
-                    }
-
-                    return;
-                }
-
-                if (result is "yes") Info("updating runtime...");
-                var progressBar = Progress("fetching runtime...");
-                await registry.FetchRuntimeAsync(progressBar);
-            }
-            else
-            {
-                Success("runtime is updated");
-            }
+            var progressBar = Progress("installing runtime...");
+            await installHandler.HandleAsync(new InstallRuntimeRequest(latestVersion, progressBar),
+                CancellationToken.None);
+            Success("runtime is installed");
         }
 
-        Success($"runtime v{await runtimeService.GetRuntimeVersionAsync()} loaded.");
+        if (installedRuntimeVersion < latestVersion)
+        {
+            var progressBar = Progress("updating runtime...");
+            await installHandler.HandleAsync(new InstallRuntimeRequest(latestVersion, progressBar),
+                CancellationToken.None);
+            Success("runtime is updated");
+        }
 
-        if (!await runtimeProcessManager.IsRunningAsync(CancellationToken.None))
+        var (_, _, isRunning) = await runtimeStatusHandler.HandleAsync(new GetRuntimeStatusRequest());
+
+        if (!isRunning)
             using (StartSpinner("running runtime"))
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-                await runtimeProcessManager.StartAsync(runtimeOptions.Value.FilePath, timeout.Token);
+                await startHandler.HandleAsync(new StartRuntimeRequest(), timeout.Token);
             }
 
-        while (true)
-        {
-            var canRead = runtimeProcessManager.Output.Reader.TryRead(out var line);
-            if (!canRead) break;
-
-            Disable(line ?? " ");
-        }
-
-        var endpoint = new RuntimeEndpoint(new Uri(
-            JsonSerializer.Deserialize<RuntimeProcessProfile>(
-                await File.ReadAllTextAsync(runtimeOptions.Value.ProcessProfile))!.Url));
-
-        if (await runtimeProcessManager.RespondsHealthyAsync(CancellationToken.None))
-            Success($"runtime started on {endpoint.Address}");
-        else
-            Error("runtime failure!");
+        Success("runtime started");
     }
 }

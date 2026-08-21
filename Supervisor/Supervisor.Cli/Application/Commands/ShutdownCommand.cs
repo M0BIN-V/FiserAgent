@@ -14,7 +14,7 @@ public class ShutdownCommand : ICommand
 
                 using (StartSpinner("shutting down..."))
                 {
-                    response = await handler.HandleAsync();
+                    response = await handler.HandleAsync(new ShutdownRequest(), CancellationToken.None);
                 }
 
                 if (response.runtimeWasNotRunning)

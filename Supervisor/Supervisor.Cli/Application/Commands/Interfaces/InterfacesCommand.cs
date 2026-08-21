@@ -1,7 +1,4 @@
-﻿using Cocona.Builder;
-using Supervisor.Cli.Application.Common;
-
-namespace Supervisor.Cli.Application.Commands.Interfaces;
+﻿namespace Supervisor.Cli.Application.Commands.Interfaces;
 
 public class ChatInterface
 {

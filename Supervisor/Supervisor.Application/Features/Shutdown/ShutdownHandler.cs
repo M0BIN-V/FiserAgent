@@ -7,9 +7,9 @@ public record ShutdownResponse(bool runtimeWasNotRunning);
 
 public class ShutdownHandler(
     ILogger<ShutdownHandler> logger,
-    RuntimeProcessManager runtimeProcessManager)
+    RuntimeProcessManager runtimeProcessManager) : Handler<ShutdownRequest, ShutdownResponse>
 {
-    public async Task<ShutdownResponse> HandleAsync()
+    public override async Task<ShutdownResponse> HandleAsync(ShutdownRequest request, CancellationToken ct = default)
     {
         logger.LogInformation("Finding runtime process...");
 

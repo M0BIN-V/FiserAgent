@@ -1,6 +1,5 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Supervisor.Application.Common.Abstractions;
 
 namespace Supervisor.Application.Common.Extensions;
 

@@ -1,13 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Supervisor.Application.Common.Abstractions;
-using Supervisor.Application.Common.Contracts;
 using Supervisor.Application.Common.Options;
 using Supervisor.Application.Services;
 
-namespace Supervisor.Application.Features.StartRuntime;
-
-public record StartRuntimeResponse(Uri Endpoint);
+namespace Supervisor.Application.Features.Runtime.StartRuntime;
 
 public class StartRuntimeHandler(
     IRuntimeProcessProfileService profileService,
@@ -29,6 +25,12 @@ public class StartRuntimeHandler(
         }
 
         var profile = await profileService.GetProfileAsync(ct);
+
+        if (!await runtimeProcessManager.RespondsHealthyAsync(CancellationToken.None))
+        {
+            throw new Exception("Runtime did not respond healthy after starting.");
+        }
+
         return new StartRuntimeResponse(new Uri(profile.Url));
     }
 }
