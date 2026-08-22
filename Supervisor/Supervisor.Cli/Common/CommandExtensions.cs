@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Supervisor.Cli.Application.Common;
+namespace Supervisor.Cli.Common;
 
 public static class CommandExtensions
 {

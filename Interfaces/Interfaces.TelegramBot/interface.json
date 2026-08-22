@@ -1,0 +1,6 @@
+﻿{
+  "uniqueName": "telegram.bot",
+  "name": "Telegram Bot",
+  "requiredRuntimeVersion": "0.0.3",
+  "version": "0.0.1"
+}

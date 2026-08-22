@@ -16,12 +16,10 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
         IOptions<SupervisorOptions> supervisorOptions)
     {
         _runtimeOptions = runtimeOptions.Value;
-        var supervisorOptions1 = supervisorOptions.Value;
 
-        var supervisorProjectPath = Path.Combine(supervisorOptions1.Directory, "..", "..", "..");
 
         _runtimeBuildFolder = Path.Combine(
-            supervisorProjectPath,
+            supervisorOptions.Value.SupervisorProjectPath,
             "..",
             "..",
             "Runtime",

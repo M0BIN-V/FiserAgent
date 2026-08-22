@@ -1,22 +1,27 @@
-﻿namespace Supervisor.Cli.Commands.Interfaces;
+﻿using Supervisor.Application.Features.Interfaces.GetList;
 
-public class ChatInterface
-{
-    public required string Id { get; set; }
-    public required string Title { get; set; }
-    public required Version Version { get; set; }
-    public required Version RequiredRuntimeVersion { get; set; }
-}
-
-public interface IChatInterfaceManager
-{
-    IEnumerable<ChatInterface> GetInstalledInterfaces();
-}
+namespace Supervisor.Cli.Commands.Interfaces;
 
 public class InterfacesCommand : ICommand
 {
     public void Map(ICoconaCommandsBuilder builder)
     {
-        builder.AddCommand("interfaces", () => { });
+        builder.AddSubCommand("interfaces", sub =>
+        {
+            sub.AddCommand("list", async ([FromService] GetInterfacesListHanlder handler) =>
+                {
+                    var response = await handler.HandleAsync(new GetInterfacesRequest(), CancellationToken.None);
+
+                    if (response.Interfaces.Count == 0)
+                    {
+                        Warning("No interfaces found.");
+                        return;
+                    }
+
+                    foreach (var iface in response.Interfaces)
+                        Console.WriteLine($"- {iface.Name} ({iface.UniqueName})");
+                })
+                .WithDescription("list all agent interfaces");
+        });
     }
 }

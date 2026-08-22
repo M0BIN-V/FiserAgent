@@ -2,9 +2,9 @@
 
 namespace Supervisor.Application.Features.Runtime.InstallRuntime;
 
-public record InstallRuntimeRequest(Version Version, IProgress<double>? progress = null);
+public record InstallRuntimeRequest(Version? Version = null, IProgress<double>? progress = null);
 
-public record InstallRuntimeResponse;
+public record InstallRuntimeResponse(Version installedVersion);
 
 public class InstallRuntimeHandler(
     IRuntimeRegistry registry,
@@ -14,9 +14,11 @@ public class InstallRuntimeHandler(
         CancellationToken ct = default)
     {
         if (await processManager.IsRunningAsync(ct)) await processManager.ShutdownAsync(ct);
+        
+        var version = request.Version ?? await registry.GetLatestRuntimeVersionAsync();
 
-        await registry.FetchRuntimeAsync(request.Version, request.progress);
+        await registry.FetchRuntimeAsync(version, request.progress);
 
-        return new InstallRuntimeResponse();
+        return new InstallRuntimeResponse(version);
     }
 }

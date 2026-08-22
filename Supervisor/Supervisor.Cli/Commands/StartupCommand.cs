@@ -1,4 +1,5 @@
-﻿using Supervisor.Application.Features.Runtime.GetLatestVersion;
+﻿using Supervisor.Application.Features.Interfaces.StartInterfaces;
+using Supervisor.Application.Features.Runtime.GetLatestVersion;
 using Supervisor.Application.Features.Runtime.GetRuntimeStatus;
 using Supervisor.Application.Features.Runtime.InstallRuntime;
 using Supervisor.Application.Features.Runtime.StartRuntime;
@@ -14,19 +15,19 @@ public class StartupCommand : ICommand
     }
 
     private static async Task Handler(
+        [FromService] StartInterfacesHandler startInterfacesHandler,
         [FromService] GetRuntimeStatusHandler runtimeStatusHandler,
         [FromService] StartRuntimeHandler startHandler,
         [FromService] InstallRuntimeHandler installHandler,
         [FromService] GetLatestVersionHandler getLatestVersionHandler)
     {
-        var (installed, installedRuntimeVersion, _) = await runtimeStatusHandler
-            .HandleAsync(new GetRuntimeStatusRequest());
+        var runtimeStatus = await runtimeStatusHandler.HandleAsync(new GetRuntimeStatusRequest());
 
         var latestVersionResult = await getLatestVersionHandler.HandleAsync(new GetLatestVersionRequest());
 
         var latestVersion = latestVersionResult.Version;
 
-        if (!installed)
+        if (!runtimeStatus.Installed)
         {
             var progressBar = Progress("installing runtime...");
             await installHandler.HandleAsync(new InstallRuntimeRequest(latestVersion, progressBar),
@@ -34,7 +35,7 @@ public class StartupCommand : ICommand
             Success("runtime is installed");
         }
 
-        if (installedRuntimeVersion < latestVersion)
+        if (runtimeStatus.Version < latestVersion)
         {
             var progressBar = Progress("updating runtime...");
             await installHandler.HandleAsync(new InstallRuntimeRequest(latestVersion, progressBar),
@@ -42,15 +43,26 @@ public class StartupCommand : ICommand
             Success("runtime is updated");
         }
 
-        var (_, _, isRunning) = await runtimeStatusHandler.HandleAsync(new GetRuntimeStatusRequest());
+        runtimeStatus = await runtimeStatusHandler.HandleAsync(new GetRuntimeStatusRequest());
 
-        if (!isRunning)
+        Uri endpoint;
+
+        if (runtimeStatus.IsRunning)
+            endpoint = runtimeStatus.Endpoint!;
+        else
             using (StartSpinner("running runtime"))
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                await startHandler.HandleAsync(new StartRuntimeRequest(), timeout.Token);
+                var result = await startHandler.HandleAsync(new StartRuntimeRequest(), timeout.Token);
+                endpoint = result.AsT0;
             }
 
         Success("runtime started");
+
+        using (StartSpinner("starting interfaces"))
+        {
+            await startInterfacesHandler.HandleAsync(
+                new StartInterfacesRequest(endpoint), CancellationToken.None);
+        }
     }
 }

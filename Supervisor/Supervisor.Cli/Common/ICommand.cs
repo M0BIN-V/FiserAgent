@@ -1,4 +1,4 @@
-﻿namespace Supervisor.Cli.Application.Common;
+﻿namespace Supervisor.Cli.Common;
 
 public interface ICommand
 {

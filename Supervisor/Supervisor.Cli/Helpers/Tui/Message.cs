@@ -2,6 +2,13 @@
 
 public static class Message
 {
+    public static void SuggestCommand(string command, string reason)
+    {
+        Info("run ", false);
+        Write($"'fiser {command}' ", ConsoleColor.Cyan);
+        Write($"to {reason}");
+    }
+
     public static void Info(string message, bool goToNextLine = true)
     {
         WriteWithIcon("ⓘ", message, ConsoleColor.Cyan, goToNextLine: goToNextLine);

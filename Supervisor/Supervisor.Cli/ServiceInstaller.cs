@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Supervisor.Application.Common.Extensions;
 using Supervisor.Application.Features.Shutdown;
 using Supervisor.Application.Services;
+using Supervisor.Cli.Common;
 using Supervisor.Infra.Services;
 
 namespace Supervisor.Cli;
@@ -20,6 +21,7 @@ public static class ServiceInstaller
         services.RegisterHandlers(typeof(ShutdownHandler).Assembly);
 
         services.AddScoped<ShutdownHandler>();
+        services.AddScoped<IInterfaceRegistry, DebugInterfaceRegistry>();
 
         services.AddSingleton<RuntimePipeClient>();
         services.AddScoped<IRuntimeService, RuntimeService>();
