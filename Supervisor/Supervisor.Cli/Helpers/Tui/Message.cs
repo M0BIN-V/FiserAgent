@@ -1,70 +1,72 @@
-﻿namespace Supervisor.Cli.Helpers.Tui;
+﻿using Spectre.Console;
+
+namespace Supervisor.Cli.Helpers.Tui;
 
 public static class Message
 {
     public static void SuggestCommand(string command, string reason)
     {
         Info("run ", false);
-        Write($"'fiser {command}' ", ConsoleColor.Cyan);
+
+        var style = new Style(
+            Color.Cyan,
+            decoration: Decoration.Bold);
+
+        var text = new Text($"'fiser {command}' ", style);
+
+        AnsiConsole.Write(text);
+
         Write($"to {reason}");
     }
 
     public static void Info(string message, bool goToNextLine = true)
     {
-        WriteWithIcon("ⓘ", message, ConsoleColor.Cyan, goToNextLine: goToNextLine);
+        WriteWithIcon("ⓘ", message, Color.Cyan, goToNextLine: goToNextLine);
     }
 
     public static void Success(string message, bool goToNextLine = true)
     {
-        WriteWithIcon("✓", message, ConsoleColor.Green, goToNextLine: goToNextLine);
+        WriteWithIcon("✓", message, Color.Green, goToNextLine: goToNextLine);
     }
 
     public static void Warning(string message, bool goToNextLine = true)
     {
-        WriteWithIcon("‼", message, ConsoleColor.Yellow, goToNextLine: goToNextLine);
+        WriteWithIcon("‼", message, Color.Yellow, goToNextLine: goToNextLine);
     }
 
     public static void Error(string message, bool goToNextLine = true)
     {
-        WriteWithIcon("✗", message, ConsoleColor.Red, goToNextLine: goToNextLine);
+        WriteWithIcon("✗", message, Color.Red, goToNextLine: goToNextLine);
     }
 
     public static void Disable(string message, bool goToNextLine = true)
     {
-        WriteWithIcon("", message, ConsoleColor.DarkGray, ConsoleColor.DarkGray, goToNextLine);
+        WriteWithIcon("", message, Color.Grey3, Color.Grey3, goToNextLine);
     }
 
-    public static void WriteLine(string message, ConsoleColor? color = null)
+    public static void Write(string message, Color? color = null)
     {
-        var oldColor = Console.ForegroundColor;
+        var style = new Style(color ?? Color.Default);
+        var text = new Text(message, style);
 
-        if (color is not null) Console.ForegroundColor = color.Value;
-
-        Console.WriteLine(message);
-
-        Console.ForegroundColor = oldColor;
-    }
-
-    public static void Write(string message, ConsoleColor? color = null)
-    {
-        var oldColor = Console.ForegroundColor;
-
-        if (color is not null) Console.ForegroundColor = color.Value;
-
-        Console.Write(message);
-
-        Console.ForegroundColor = oldColor;
+        AnsiConsole.Write(text);
     }
 
     public static void WriteWithIcon(
         string icon,
         string message,
-        ConsoleColor iconColor,
-        ConsoleColor? messageColor = null, bool goToNextLine = true)
+        Color iconColor,
+        Color? messageColor = null, bool goToNextLine = true)
     {
-        Write($"{icon} ", iconColor);
+        var iconStyle = new Style(iconColor, decoration: Decoration.Bold);
+        var iconText = new Text($"{icon} ", iconStyle);
 
-        if (goToNextLine) WriteLine(message, messageColor);
-        else Write(message, messageColor);
+        var messageStyle = new Style(messageColor ?? Color.Default);
+        var messageText = new Text(message, messageStyle);
+
+        AnsiConsole.Write(iconText);
+        AnsiConsole.Write(messageText);
+
+        if (goToNextLine) Console.WriteLine();
     }
 }

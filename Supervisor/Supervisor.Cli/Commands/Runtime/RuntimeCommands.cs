@@ -1,5 +1,7 @@
 ﻿using Supervisor.Application.Features.Runtime.InstallRuntime;
+using Supervisor.Application.Features.Runtime.Shutdown;
 using Supervisor.Application.Features.Runtime.StartRuntime;
+using Supervisor.Application.Features.Shutdown;
 
 namespace Supervisor.Cli.Commands.Runtime;
 
@@ -27,21 +29,41 @@ public class RuntimeCommands : ICommand
                 .WithDescription("starts fiser runtime process");
 
             sub.AddCommand("install", async (
-                [Option('v')] string? version,
-                [FromService] InstallRuntimeHandler handler) =>
-            {
-                var ct = CancellationToken.None;
-
-                InstallRuntimeResponse result;
-
-                using (StartSpinner("installing runtime"))
+                    [Option('v')] string? version,
+                    [FromService] InstallRuntimeHandler handler) =>
                 {
-                    result = await handler.HandleAsync(
-                        new InstallRuntimeRequest(), ct);
-                }
+                    //TODO validate version
 
-                Success($"runtime v{result.installedVersion} installed.");
-            });
+                    var ct = CancellationToken.None;
+
+                    InstallRuntimeResponse result;
+
+                    var progress = Progress("installing runtime");
+
+                    result = await handler.HandleAsync(
+                        new InstallRuntimeRequest(progress: progress), ct);
+
+                    Success($"runtime v{result.installedVersion} installed.");
+                })
+                .WithDescription("installs runtime");
+
+            sub.AddCommand("stop", async (
+                    [FromService] ShutdownRuntimeHandler runtimeHandler) =>
+                {
+                    ShutdownRuntimeResponse runtimeResponse;
+
+                    using (StartSpinner("shutting down..."))
+                    {
+                        runtimeResponse =
+                            await runtimeHandler.HandleAsync(new ShutdownRuntimeRequest(), CancellationToken.None);
+                    }
+
+                    if (runtimeResponse.runtimeWasNotRunning)
+                        Warning("runtime is not running.");
+                    else
+                        Success("runtime shutdown completed.");
+                })
+                .WithDescription("shutdown runtime process");
         });
     }
 }

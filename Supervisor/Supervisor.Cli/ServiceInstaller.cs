@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Supervisor.Application.Common.Extensions;
-using Supervisor.Application.Features.Shutdown;
+using Supervisor.Application.Features.Runtime.Shutdown;
 using Supervisor.Application.Services;
-using Supervisor.Cli.Common;
 using Supervisor.Infra.Services;
 
 namespace Supervisor.Cli;
@@ -18,17 +17,18 @@ public static class ServiceInstaller
 
         services.AddCommands(typeof(ServiceInstaller).Assembly);
 
-        services.RegisterHandlers(typeof(ShutdownHandler).Assembly);
+        services.RegisterHandlers(typeof(ShutdownRuntimeHandler).Assembly);
 
-        services.AddScoped<ShutdownHandler>();
-        services.AddScoped<IInterfaceRegistry, DebugInterfaceRegistry>();
+        services.AddScoped<ShutdownRuntimeHandler>();
 
         services.AddSingleton<RuntimePipeClient>();
+        services.AddScoped<IInterfaceProcessManager, InterfaceProcessManager>();
         services.AddScoped<IRuntimeService, RuntimeService>();
         services.AddScoped<RuntimeProcessManager>();
         services.AddHttpClient<RuntimeProcessManager>(client => client.Timeout = TimeSpan.FromMinutes(5));
 #if DEBUG
         services.AddScoped<IRuntimeRegistry, DebugRuntimeRegistry>();
+        services.AddScoped<IInterfaceRegistry, DebugInterfaceRegistry>();
 #endif
         services.AddScoped<IRuntimeProcessProfileService, RuntimeProcessProfileService>();
 

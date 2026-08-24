@@ -1,11 +1,12 @@
-﻿namespace Supervisor.Application.Features.Interfaces.StartInterfaces;
+﻿using System.Data;
 
-public record StartInterfacesRequest(Uri RuntimeEndpoint);
+namespace Supervisor.Application.Features.Interfaces.Start;
+
+public record StartInterfacesRequest(string interfaceUniqueName);
 
 public record StartInterfacesResponse;
 
-public class StartInterfacesHandler(
-    IInterfaceRegistry registry) :
+public class StartInterfacesHandler (IInterfaceRegistry registry):
     Handler<StartInterfacesRequest, StartInterfacesResponse>
 {
     public override Task<StartInterfacesResponse> HandleAsync(StartInterfacesRequest request,

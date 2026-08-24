@@ -25,15 +25,9 @@ public class RuntimeService(IOptions<RuntimeOptions> runtimeOptions) : IRuntimeS
 
     public bool RunIsTimeInstalled()
     {
-        var runtimeFolder = _runtimeOptions.FolderPath;
-
-        if (!Directory.Exists(runtimeFolder))
-            return false;
-
-        var runtimeFile = _runtimeOptions.FilePath;
-
-        if (!File.Exists(runtimeFile))
-            return false;
+        if (!Directory.Exists(_runtimeOptions.FolderPath)) return false;
+        
+        if (!File.Exists(_runtimeOptions.FilePath)) return false;
 
         return true;
     }

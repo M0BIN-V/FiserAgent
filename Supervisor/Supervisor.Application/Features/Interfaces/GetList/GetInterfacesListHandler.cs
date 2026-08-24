@@ -6,7 +6,7 @@ public record ViewInterface(string UniqueName, string Name, Version version);
 
 public record GetInterfacesResponse(List<ViewInterface> Interfaces);
 
-public class GetInterfacesListHanlder(
+public class GetInterfacesListHandler(
     IInterfaceRegistry registry,
     IRuntimeService runtimeService) :
     Handler<GetInterfacesRequest, GetInterfacesResponse>

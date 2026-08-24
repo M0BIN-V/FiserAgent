@@ -16,12 +16,12 @@ public class StartRuntimeHandler(
     public override async Task<StartRuntimeResponse> HandleAsync(StartRuntimeRequest request,
         CancellationToken ct = default)
     {
+        if (!runtimeService.RunIsTimeInstalled()) return new RuntimeIsNotInstalledError();
+
         if (await runtimeProcessManager.IsRunningAsync(ct))
             return new RuntimeIsAlreadyRunningError();
 
         await runtimeProcessManager.StartAsync(runtimeOptions.Value.FilePath, ct);
-
-        if (!runtimeService.RunIsTimeInstalled()) return new RuntimeIsNotInstalledError();
 
         while (true)
         {
