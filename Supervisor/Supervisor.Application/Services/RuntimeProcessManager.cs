@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Threading.Channels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Supervisor.Application.Common.Options;
 using Supervisor.Application.Services.ProcessProfile;
@@ -18,8 +19,10 @@ public sealed class RuntimeProcessManager(
     IOptions<RuntimeOptions> options,
     ProfileService<RuntimeProcessProfile> profileService,
     PipeClient pipeClient,
+    ILogger<RuntimeProcessManager> logger,
+    ILogger<ProcessManager<RuntimeProcessProfile>> baseLogger,
     HttpClient httpClient) :
-    ProcessManager<RuntimeProcessProfile>(pipeClient, profileService)
+    ProcessManager<RuntimeProcessProfile>(baseLogger, pipeClient, profileService)
 {
     private readonly Channel<string> _output = Channel.CreateUnbounded<string>();
     public readonly Channel<string> Errors = Channel.CreateUnbounded<string>();
@@ -45,9 +48,9 @@ public sealed class RuntimeProcessManager(
         return response.StatusCode is HttpStatusCode.OK;
     }
 
-    public async Task StartAsync(CancellationToken ct = default)
+    public async Task StartAsync(Dictionary<string, string> environmentVariables, CancellationToken ct = default)
     {
-        await StartProcess(ct);
+        await StartProcess(environmentVariables, ct);
 
         var endpoint = await WaitForEndpointAsync(ct);
 
@@ -62,12 +65,16 @@ public sealed class RuntimeProcessManager(
     {
         if (e.Data is null) return;
         Errors.Writer.TryWrite(e.Data);
+
+        logger.LogError("Runtime error: {Error}", e.Data);
     }
 
     protected override void OnOutput(object? sender, DataReceivedEventArgs e)
     {
         if (e.Data is null) return;
         _output.Writer.TryWrite(e.Data);
+
+        logger.LogDebug("Runtime output: {Output}", e.Data);
     }
 
 

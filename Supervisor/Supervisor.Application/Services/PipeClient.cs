@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
 using System.IO.Pipes;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Supervisor.Application.Services;
 
-public sealed class PipeClient : IAsyncDisposable
+public sealed class PipeClient(ILogger<PipeClient> logger) : IAsyncDisposable
 {
     private NamedPipeClientStream? _pipe;
     private StreamReader? _reader;
@@ -29,6 +30,8 @@ public sealed class PipeClient : IAsyncDisposable
     {
         if (IsConnected) return;
 
+        logger.LogDebug($"Connecting to pipe :{pipeName}");
+
         var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
         await pipe.ConnectAsync(cancellationToken);
@@ -45,13 +48,15 @@ public sealed class PipeClient : IAsyncDisposable
 
     public async Task SendAsync(string command, CancellationToken cancellationToken = default)
     {
+        logger.LogDebug("sending pipe command");
         if (_writer is null || !IsConnected) throw new InvalidOperationException("Pipe is not connected.");
 
-        await _writer.WriteLineAsync(command.AsMemory(), cancellationToken );
+        await _writer.WriteLineAsync(command.AsMemory(), cancellationToken);
     }
 
     public async Task<string?> ReceiveAsync(CancellationToken cancellationToken = default)
     {
+        logger.LogDebug("command received from pipe");
         if (_reader is null || !IsConnected) throw new InvalidOperationException("Pipe is not connected.");
 
         return await _reader.ReadLineAsync(cancellationToken);
@@ -61,6 +66,7 @@ public sealed class PipeClient : IAsyncDisposable
     public async Task<TimeSpan> PingAsync(
         CancellationToken cancellationToken = default)
     {
+        logger.LogDebug("pinging pipe");
         var stopwatch = Stopwatch.StartNew();
 
         await SendAsync("ping", cancellationToken);
@@ -76,6 +82,7 @@ public sealed class PipeClient : IAsyncDisposable
 
     public async Task ShutdownAsync(CancellationToken cancellationToken = default)
     {
+        logger.LogDebug("sending shutdown command");
         await SendAsync("shutdown", cancellationToken);
     }
 }

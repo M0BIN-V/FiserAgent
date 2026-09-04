@@ -18,7 +18,13 @@ public class StartRuntimeHandler(
         if (await runtimeProcessManager.IsRunningHealthyAsync(ct))
             return new RuntimeIsAlreadyRunningError();
 
-        await runtimeProcessManager.StartAsync(ct);
+        var env = new Dictionary<string, string>
+        {
+            ["OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"] = "grpc",
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://localhost:4317"
+        };
+
+        await runtimeProcessManager.StartAsync(env, ct);
 
         while (true)
         {

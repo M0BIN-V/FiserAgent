@@ -1,52 +1,49 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Supervisor.Application.Services.ProcessProfile;
 
 namespace Supervisor.Application.Services;
 
 public abstract class ProcessManager<TProcessProfile>(
+    ILogger<ProcessManager<TProcessProfile>> baseLogger,
     PipeClient pipeClient,
     ProfileService<TProcessProfile> profileService)
-    : IDisposable
     where TProcessProfile : ProcessProfile.ProcessProfile, new()
 {
     protected readonly ProfileService<TProcessProfile> ProfileService = profileService;
     protected Process? Process;
     protected abstract string FilePath { get; set; }
 
-    public void Dispose()
-    {
-        Process?.Dispose();
-        GC.SuppressFinalize(this);
-    }
-
     protected abstract void OnOutput(object? sender, DataReceivedEventArgs e);
     protected abstract void OnError(object? sender, DataReceivedEventArgs e);
 
-    protected static bool IsProcessRunning(TProcessProfile profile)
+    protected bool IsProcessRunning(TProcessProfile profile)
     {
         try
         {
+            baseLogger.LogDebug($"connecting to process : {profile.ProcessId}");
             using var process = Process.GetProcessById(profile.ProcessId);
 
-            return !process.HasExited && string.Equals(
-                process.ProcessName,
-                profile.ProcessName,
-                StringComparison.OrdinalIgnoreCase);
+            return !process.HasExited &&
+                   string.Equals(process.ProcessName, profile.ProcessName, StringComparison.OrdinalIgnoreCase);
         }
-        catch (ArgumentException)
+        catch (ArgumentException e)
         {
+            baseLogger.LogDebug(e.Message);
             return false;
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 5)
         {
             // Access denied
+            baseLogger.LogDebug(ex.Message);
             return false;
         }
     }
 
     public virtual async Task<bool> IsRunningHealthyAsync(CancellationToken ct)
     {
+        baseLogger.LogDebug("Validating profile file");
         if (!ProfileService.ProfileExists()) return false;
 
         var profile = await ProfileService.GetProfileAsync(ct);
@@ -82,13 +79,13 @@ public abstract class ProcessManager<TProcessProfile>(
         return processIsRunning;
     }
 
-    protected async Task StartProcess(CancellationToken ct)
+    protected async Task StartProcess(Dictionary<string, string> environmentVariables, CancellationToken ct)
     {
         if (await IsRunningHealthyAsync(ct)) throw new InvalidOperationException("Process is already running.");
 
         var pipeName = Guid.NewGuid().ToString("N");
 
-        InitProcess(pipeName);
+        InitProcess(pipeName, environmentVariables);
 
         if (!Process!.Start()) throw new InvalidOperationException($"Failed to start process : {FilePath}");
 
@@ -116,20 +113,20 @@ public abstract class ProcessManager<TProcessProfile>(
         await pipeClient.DisposeAsync();
     }
 
-    private void InitProcess(string pipeName)
+    private void InitProcess(string pipeName, Dictionary<string, string> environmentVariables)
     {
+        environmentVariables.Add("SUPERVISOR_PIPE_NAME", pipeName);
+
         var startInfo = new ProcessStartInfo
         {
             FileName = FilePath,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true,
-            Environment =
-            {
-                ["SUPERVISOR_PIPE_NAME"] = pipeName
-            }
+            CreateNoWindow = true
         };
+
+        foreach (var keyValuePair in environmentVariables) startInfo.Environment[keyValuePair.Key] = keyValuePair.Value;
 
         Process = new Process
         {

@@ -124,6 +124,10 @@ public static class Extensions
                 Predicate = r => r.Tags.Contains("live")
             });
         }
+        else
+        {
+            app.MapGet("alive", () => "true");
+        }
 
         return app;
     }

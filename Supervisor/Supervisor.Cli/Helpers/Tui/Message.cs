@@ -41,7 +41,7 @@ public static class Message
 
     public static void Disable(string message, bool goToNextLine = true)
     {
-        WriteWithIcon("", message, Color.Grey3, Color.Grey3, goToNextLine);
+        WriteWithIcon("", message, Color.Default, Color.Default, goToNextLine);
     }
 
     public static void Write(string message, Color? color = null)

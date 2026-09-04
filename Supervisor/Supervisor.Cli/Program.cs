@@ -1,13 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
 using Supervisor.Cli;
-using Supervisor.Cli.Common;
 
 Console.OutputEncoding = Encoding.Unicode;
 
-var builder = CoconaApp.CreateBuilder()
+var logLevel = args.Any(a => a.Equals("--debug", StringComparison.OrdinalIgnoreCase))
+    ? LogLevel.Debug
+    : LogLevel.Error;
+
+args.Replace("--debug", string.Empty);
+
+var builder = CoconaApp.CreateBuilder(args)
     .InstallServices();
 
-builder.Logging.SetMinimumLevel(LogLevel.Error);
+builder.Logging.ClearProviders();
+builder.Logging.AddProvider(new CustomLoggerProvider());
+
+builder.Logging.SetMinimumLevel(logLevel);
 
 builder
     .Build()

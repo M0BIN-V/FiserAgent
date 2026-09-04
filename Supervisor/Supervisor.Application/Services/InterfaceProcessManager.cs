@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Supervisor.Application.Services.ProcessProfile;
 
 namespace Supervisor.Application.Services;
@@ -7,7 +8,9 @@ public class InterfaceProcessProfile : ProcessProfile.ProcessProfile;
 
 public class InterfaceProcessManager(
     PipeClient pipeClient,
-    ProfileService<ProcessProfile.ProcessProfile> profileService) : ProcessManager<ProcessProfile.ProcessProfile>(pipeClient, profileService)
+    ILogger<ProcessManager<ProcessProfile.ProcessProfile>> baseLogger,
+    ProfileService<ProcessProfile.ProcessProfile> profileService) 
+    : ProcessManager<ProcessProfile.ProcessProfile>(baseLogger, pipeClient, profileService)
 {
     protected override string FilePath { get; set; }
     

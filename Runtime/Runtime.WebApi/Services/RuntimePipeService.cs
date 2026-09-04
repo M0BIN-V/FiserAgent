@@ -13,55 +13,88 @@ public sealed class RuntimePipeService(
         var pipeName = config.GetValue<string>("SUPERVISOR_PIPE_NAME");
 
         if (string.IsNullOrWhiteSpace(pipeName))
-            throw new InvalidOperationException("SUPERVISOR_PIPE_NAME config is not set.");
+            throw new InvalidOperationException(
+                "SUPERVISOR_PIPE_NAME config is not set.");
 
         logger.LogInformation(
             "Starting runtime pipe server: {PipeName}",
             pipeName);
 
-        await using var pipe = new NamedPipeServerStream(
-            pipeName,
-            PipeDirection.InOut,
-            1,
-            PipeTransmissionMode.Byte,
-            PipeOptions.Asynchronous);
-
-        logger.LogInformation("Waiting for supervisor connection...");
-
-        await pipe.WaitForConnectionAsync(stoppingToken);
-
-        logger.LogInformation("Supervisor connected.");
-
-        using var reader = new StreamReader(pipe);
-        await using var writer = new StreamWriter(pipe);
-        writer.AutoFlush = true;
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            var command = await reader.ReadLineAsync(stoppingToken);
+            await using var pipe = new NamedPipeServerStream(
+                pipeName,
+                PipeDirection.InOut,
+                1,
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous);
 
-            if (command is null)
-                break;
+            logger.LogInformation(
+                "Waiting for supervisor connection...");
 
-            logger.LogInformation("Received command: {Command}", command);
-
-            if (command.Equals("ping", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                await writer.WriteLineAsync("pong");
+                await pipe.WaitForConnectionAsync(stoppingToken);
 
-                logger.LogDebug("Sent pong.");
+                logger.LogInformation(
+                    "Supervisor connected.");
 
-                continue;
+                using var reader = new StreamReader(pipe);
+                await using var writer = new StreamWriter(pipe)
+                {
+                    AutoFlush = true
+                };
+
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    var command = await reader.ReadLineAsync(stoppingToken);
+
+                    if (command is null)
+                    {
+                        logger.LogInformation(
+                            "Supervisor disconnected.");
+
+                        break;
+                    }
+
+                    logger.LogInformation(
+                        "Received command: {Command}",
+                        command);
+
+                    if (command.Equals(
+                            "ping",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        await writer.WriteLineAsync("pong");
+
+                        logger.LogDebug("Sent pong.");
+
+                        continue;
+                    }
+
+                    if (command.Equals(
+                            "shutdown",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        logger.LogInformation(
+                            "Shutdown command received.");
+
+                        lifetime.StopApplication();
+
+                        return;
+                    }
+
+                    logger.LogWarning("Unknown command received: {Command}",
+                        command);
+                }
             }
-
-            if (command.Equals("shutdown", StringComparison.OrdinalIgnoreCase))
+            catch (OperationCanceledException)
+                when (stoppingToken.IsCancellationRequested)
             {
-                logger.LogInformation("Shutdown command received.");
-
-                lifetime.StopApplication();
-
                 break;
             }
         }
+
+        logger.LogInformation("Runtime pipe server stopped.");
     }
 }
