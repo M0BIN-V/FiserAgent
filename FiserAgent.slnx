@@ -5,7 +5,6 @@
     <Folder Name="/Runtime/">
         <Project Path="Runtime/Runtime.Core/Runtime.Core.csproj" />
         <Project Path="Runtime/Runtime.WebApi/Runtime.WebApi.csproj" />
-        <Project Path="Runtime/ServiceDefaults/ServiceDefaults.csproj" />
         <Project Path="Runtime/TMPTest/TMPTest.csproj" />
     </Folder>
     <Folder Name="/Solution items/">
