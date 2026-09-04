@@ -13,8 +13,7 @@ public class StatusCommand : ICommand
                 {
                     var ctSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-                    status = await handler
-                        .HandleAsync(new GetRuntimeStatusRequest(), ctSource.Token);
+                    status = await handler.HandleAsync(new GetRuntimeStatusRequest(), ctSource.Token);
                 }
 
                 if (!status.Installed)

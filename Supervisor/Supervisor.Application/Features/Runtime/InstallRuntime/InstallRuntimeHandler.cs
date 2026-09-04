@@ -13,7 +13,7 @@ public class InstallRuntimeHandler(
     public override async Task<InstallRuntimeResponse> HandleAsync(InstallRuntimeRequest request,
         CancellationToken ct = default)
     {
-        if (await processManager.IsRunningAsync(ct)) await processManager.ShutdownAsync(ct);
+        if (await processManager.IsRunningHealthyAsync(ct)) await processManager.ShutdownAsync(ct);
         
         var version = request.Version ?? await registry.GetLatestRuntimeVersionAsync();
 

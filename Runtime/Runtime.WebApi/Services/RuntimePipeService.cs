@@ -10,12 +10,14 @@ public sealed class RuntimePipeService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var pipeName = config.GetValue<string>("PIPE_NAME");
+        var pipeName = config.GetValue<string>("SUPERVISOR_PIPE_NAME");
 
         if (string.IsNullOrWhiteSpace(pipeName))
-            throw new InvalidOperationException("PIPE_NAME config is not set.");
+            throw new InvalidOperationException("SUPERVISOR_PIPE_NAME config is not set.");
 
-        logger.LogInformation("Starting runtime pipe server: {PipeName}", pipeName);
+        logger.LogInformation(
+            "Starting runtime pipe server: {PipeName}",
+            pipeName);
 
         await using var pipe = new NamedPipeServerStream(
             pipeName,
@@ -31,14 +33,26 @@ public sealed class RuntimePipeService(
         logger.LogInformation("Supervisor connected.");
 
         using var reader = new StreamReader(pipe);
+        await using var writer = new StreamWriter(pipe);
+        writer.AutoFlush = true;
 
         while (!stoppingToken.IsCancellationRequested)
         {
             var command = await reader.ReadLineAsync(stoppingToken);
 
-            if (command is null) break;
+            if (command is null)
+                break;
 
             logger.LogInformation("Received command: {Command}", command);
+
+            if (command.Equals("ping", StringComparison.OrdinalIgnoreCase))
+            {
+                await writer.WriteLineAsync("pong");
+
+                logger.LogDebug("Sent pong.");
+
+                continue;
+            }
 
             if (command.Equals("shutdown", StringComparison.OrdinalIgnoreCase))
             {

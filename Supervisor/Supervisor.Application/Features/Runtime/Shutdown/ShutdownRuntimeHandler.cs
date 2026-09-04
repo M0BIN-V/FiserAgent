@@ -14,7 +14,7 @@ public class ShutdownRuntimeHandler(
     {
         logger.LogInformation("Finding runtime process...");
 
-        if (!await runtimeProcessManager.IsRunningAsync(CancellationToken.None))
+        if (!await runtimeProcessManager.IsRunningHealthyAsync(CancellationToken.None))
         {
             logger.LogWarning("Runtime is not running.");
             return new ShutdownRuntimeResponse(true);

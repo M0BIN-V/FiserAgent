@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Supervisor.Application.Common.Contracts;
 using Supervisor.Application.Common.Options;
+using Supervisor.Application.Services;
 
 namespace Supervisor.Infra.Services;
 

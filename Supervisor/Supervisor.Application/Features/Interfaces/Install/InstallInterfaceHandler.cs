@@ -1,5 +1,4 @@
-﻿using OneOf;
-using Supervisor.Application.Common.Errors;
+﻿using Supervisor.Application.Common.Errors;
 
 namespace Supervisor.Application.Features.Interfaces.Install;
 
@@ -25,7 +24,7 @@ public class InstallInterfaceHandler(
 
         if (@interface is null) return new InterfaceNotFoundError(request.UniqueName);
 
-        if (await interfaceProcessManager.InterfaceIsRunningAsync(ct))
+        if (await interfaceProcessManager.InterfaceIsRunningAsync(request.UniqueName, ct))
             await interfaceProcessManager.ShutdownInterfaceAsync(ct);
 
         await registry.FetchAsync(request.UniqueName, @interface.Version, request.progress);

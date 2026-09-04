@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Supervisor.Application.Common.Errors;
-using Supervisor.Application.Common.Options;
 using Supervisor.Application.Services;
 
 namespace Supervisor.Application.Features.Runtime.StartRuntime;
@@ -10,7 +8,6 @@ public class StartRuntimeHandler(
     IRuntimeService runtimeService,
     IRuntimeProcessProfileService profileService,
     RuntimeProcessManager runtimeProcessManager,
-    IOptions<RuntimeOptions> runtimeOptions,
     ILogger<StartRuntimeHandler> logger) : Handler<StartRuntimeRequest, StartRuntimeResponse>
 {
     public override async Task<StartRuntimeResponse> HandleAsync(StartRuntimeRequest request,
@@ -18,10 +15,10 @@ public class StartRuntimeHandler(
     {
         if (!runtimeService.RunIsTimeInstalled()) return new RuntimeIsNotInstalledError();
 
-        if (await runtimeProcessManager.IsRunningAsync(ct))
+        if (await runtimeProcessManager.IsRunningHealthyAsync(ct))
             return new RuntimeIsAlreadyRunningError();
 
-        await runtimeProcessManager.StartAsync(runtimeOptions.Value.FilePath, ct);
+        await runtimeProcessManager.StartAsync(ct);
 
         while (true)
         {

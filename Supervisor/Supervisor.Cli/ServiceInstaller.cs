@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Supervisor.Application.Common.Extensions;
 using Supervisor.Application.Features.Runtime.Shutdown;
 using Supervisor.Application.Services;
+using Supervisor.Application.Services.ProcessProfile;
 using Supervisor.Infra.Services;
 
 namespace Supervisor.Cli;
@@ -21,8 +22,10 @@ public static class ServiceInstaller
 
         services.AddScoped<ShutdownRuntimeHandler>();
 
-        services.AddSingleton<RuntimePipeClient>();
-        services.AddScoped<IInterfaceProcessManager, InterfaceProcessManager>();
+        services.AddScoped<ProfileService<RuntimeProcessProfile>, RuntimeProfileService>();
+
+        services.AddSingleton<PipeClient>();
+        services.AddScoped<InterfaceProcessManager>();
         services.AddScoped<IRuntimeService, RuntimeService>();
         services.AddScoped<RuntimeProcessManager>();
         services.AddHttpClient<RuntimeProcessManager>(client => client.Timeout = TimeSpan.FromMinutes(5));

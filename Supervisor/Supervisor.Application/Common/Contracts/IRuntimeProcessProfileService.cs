@@ -1,4 +1,4 @@
-﻿using Supervisor.Application.Common.Options;
+﻿using Supervisor.Application.Services;
 
 namespace Supervisor.Application.Common.Contracts;
 

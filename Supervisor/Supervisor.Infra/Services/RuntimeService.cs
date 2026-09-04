@@ -5,6 +5,8 @@ using Supervisor.Application.Common.Options;
 
 namespace Supervisor.Infra.Services;
 
+//Manages the installed runtime and its version.
+
 public class RuntimeService(IOptions<RuntimeOptions> runtimeOptions) : IRuntimeService
 {
     private readonly RuntimeOptions _runtimeOptions = runtimeOptions.Value;

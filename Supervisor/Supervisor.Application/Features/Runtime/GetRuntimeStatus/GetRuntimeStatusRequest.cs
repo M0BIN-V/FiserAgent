@@ -4,11 +4,7 @@ namespace Supervisor.Application.Features.Runtime.GetRuntimeStatus;
 
 public record GetRuntimeStatusRequest;
 
-public record GetRuntimeStatusResponse(
-    bool Installed,
-    Version? Version,
-    bool IsRunning,
-    Uri? Endpoint);
+public record GetRuntimeStatusResponse(bool Installed, Version? Version, bool IsRunning, Uri? Endpoint);
 
 public class GetRuntimeStatusHandler(
     IRuntimeProcessProfileService profileService,
@@ -24,8 +20,8 @@ public class GetRuntimeStatusHandler(
         if (!isInstalled) return new GetRuntimeStatusResponse(isInstalled, null, false, null);
 
         var versionResult = runtimeService.GetRuntimeVersionAsync();
-        var isRunningResult = runtimeProcessManager.IsRunningAsync(ct);
-        
+        var isRunningResult = runtimeProcessManager.IsRunningHealthyAsync(ct);
+
         await Task.WhenAll(versionResult, isRunningResult);
 
         Uri? endpoint = null;
