@@ -5,7 +5,7 @@ using Supervisor.Application.Common.Options;
 
 namespace Supervisor.Infra.Services;
 
-//Manages the installed runtime and its version.
+//TODO Manages the installed runtime and its version.
 
 public class RuntimeService(IOptions<RuntimeOptions> runtimeOptions) : IRuntimeService
 {
@@ -28,7 +28,7 @@ public class RuntimeService(IOptions<RuntimeOptions> runtimeOptions) : IRuntimeS
     public bool RunIsTimeInstalled()
     {
         if (!Directory.Exists(_runtimeOptions.FolderPath)) return false;
-        
+
         if (!File.Exists(_runtimeOptions.FilePath)) return false;
 
         return true;

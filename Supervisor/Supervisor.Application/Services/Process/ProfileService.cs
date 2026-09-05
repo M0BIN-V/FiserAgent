@@ -1,31 +1,9 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
-using Supervisor.Application.Common.Options;
 
-namespace Supervisor.Application.Services.ProcessProfile;
-
-public class RuntimeProfileService(IOptions<RuntimeOptions> options) : ProfileService<RuntimeProcessProfile>
-{
-    protected override string ProfileFilePath { get; } = options.Value.ProcessProfile;
-}
-
-public class InterfaceProcessProfile : ProcessProfile;
-
-public class InterfaceProfileService(string profileFilePath) : ProfileService<InterfaceProcessProfile>
-{
-    protected override string ProfileFilePath { get; } = profileFilePath;
-}
-
-public class InterfaceProfileServiceFactory
-{
-    public InterfaceProfileService Create(string profileFilePath)
-    {
-        return new InterfaceProfileService(profileFilePath);
-    }
-}
+namespace Supervisor.Application.Services.Process;
 
 public abstract class ProfileService<TProcessProfile>
-    where TProcessProfile : ProcessProfile
+    where TProcessProfile : Process.ProcessProfile
 {
     protected abstract string ProfileFilePath { get; }
 

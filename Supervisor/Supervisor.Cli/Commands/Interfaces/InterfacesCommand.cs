@@ -1,6 +1,7 @@
 ﻿using Supervisor.Application.Features.Interfaces.GetList;
 using Supervisor.Application.Features.Interfaces.Install;
 using Supervisor.Cli.Helpers.Tui;
+using Supervisor.Cli.Helpers.Tui.Components;
 
 namespace Supervisor.Cli.Commands.Interfaces;
 

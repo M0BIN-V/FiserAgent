@@ -30,53 +30,17 @@ public static class ConsoleUi
         });
     }
 
-
     public static Task StartSpinnerAsync(string message, Func<Task> func)
     {
         return AnsiConsole.Status()
             .Spinner(Spinner.Known.DotsCircle)
-            .StartAsync("Checking runtime status...", ctx => func());
+            .StartAsync(message, _ => func());
     }
 
     public static Task<T> StartSpinnerAsync<T>(string message, Func<Task<T>> func)
     {
         return AnsiConsole.Status()
             .Spinner(Spinner.Known.DotsCircle)
-            .StartAsync("Checking runtime status...", ctx => func());
-    }
-}
-
-public class Table
-{
-    public List<string> Columns { get; } = [];
-    public List<List<string>> Rows { get; } = [];
-
-    public Table AddColumns(params string[] columns)
-    {
-        Columns.AddRange(columns);
-        return this;
-    }
-
-    public void AddRow(params string[] values)
-    {
-        Rows.Add(values.ToList());
-    }
-
-    public void Print()
-    {
-        var table = new Spectre.Console.Table();
-
-        table.SimpleBorder();
-
-        table.BorderColor(Color.Cyan);
-
-
-        foreach (var column in Columns)
-            table.AddColumn(column, col => col.Centered());
-
-        foreach (var row in Rows)
-            table.AddRow(row.ToArray());
-
-        AnsiConsole.Write(table);
+            .StartAsync(message, _ => func());
     }
 }

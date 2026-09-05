@@ -1,4 +1,6 @@
 ﻿using Supervisor.Application.Services;
+using Supervisor.Application.Services.Process;
+using Supervisor.Application.Services.Process.Runtime;
 
 namespace Supervisor.Application.Features.Runtime.GetRuntimeStatus;
 
@@ -7,7 +9,7 @@ public record GetRuntimeStatusRequest;
 public record GetRuntimeStatusResponse(bool Installed, Version? Version, bool IsRunning, Uri? Endpoint);
 
 public class GetRuntimeStatusHandler(
-    IRuntimeProcessProfileService profileService,
+    RuntimeProfileService profileService,
     IRuntimeService runtimeService,
     ProcessManagerFactory managerFactory,
     RuntimeClient runtimeClient) :

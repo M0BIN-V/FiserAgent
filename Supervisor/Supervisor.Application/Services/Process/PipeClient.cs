@@ -3,7 +3,7 @@ using System.IO.Pipes;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace Supervisor.Application.Services;
+namespace Supervisor.Application.Services.Process;
 
 public sealed class PipeClient(ILogger<PipeClient> logger) : IAsyncDisposable
 {

@@ -2,10 +2,10 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace Supervisor.Application.Services;
+namespace Supervisor.Application.Services.Process;
 
 public sealed class ProcessManager(
-    ProcessProfile.ProcessProfile profile,
+    ProcessProfile profile,
     ILogger<ProcessManager> baseLogger,
     PipeClient pipeClient)
 {
@@ -16,7 +16,7 @@ public sealed class ProcessManager(
         try
         {
             baseLogger.LogDebug($"Connecting to process : {profile.ProcessId}");
-            using var process = Process.GetProcessById(profile.ProcessId.Value);
+            using var process = System.Diagnostics.Process.GetProcessById(profile.ProcessId.Value);
 
             return !process.HasExited &&
                    string.Equals(process.ProcessName, profile.ProcessName, StringComparison.OrdinalIgnoreCase);
@@ -65,7 +65,7 @@ public sealed class ProcessManager(
         return true;
     }
 
-    public async Task<Process> StartProcess(
+    public async Task<System.Diagnostics.Process> StartProcess(
         string filePath,
         Dictionary<string, string> environmentVariables,
         DataReceivedEventHandler? onOutput = null,
@@ -98,7 +98,7 @@ public sealed class ProcessManager(
         await pipeClient.DisposeAsync();
     }
 
-    private Process InitProcess(
+    private System.Diagnostics.Process InitProcess(
         string filePath,
         Dictionary<string, string> environmentVariables)
     {
@@ -115,7 +115,7 @@ public sealed class ProcessManager(
 
         foreach (var keyValuePair in environmentVariables) startInfo.Environment[keyValuePair.Key] = keyValuePair.Value;
 
-        var process = new Process
+        var process = new System.Diagnostics.Process
         {
             StartInfo = startInfo,
             EnableRaisingEvents = true
@@ -129,7 +129,7 @@ public class ProcessManagerFactory(
     ILogger<ProcessManager> processManagerLogger,
     PipeClient pipeClient)
 {
-    public ProcessManager Create(ProcessProfile.ProcessProfile profile)
+    public ProcessManager Create(ProcessProfile profile)
     {
         return new ProcessManager(profile, processManagerLogger, pipeClient);
     }

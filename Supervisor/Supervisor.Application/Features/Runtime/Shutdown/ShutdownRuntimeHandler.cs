@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Supervisor.Application.Features.Shutdown;
 using Supervisor.Application.Services;
-using Supervisor.Application.Services.ProcessProfile;
+using Supervisor.Application.Services.Process;
+using Supervisor.Application.Services.Process.Runtime;
 
 namespace Supervisor.Application.Features.Runtime.Shutdown;
 

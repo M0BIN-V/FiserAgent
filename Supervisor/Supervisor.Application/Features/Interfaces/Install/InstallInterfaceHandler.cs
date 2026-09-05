@@ -1,6 +1,7 @@
 ﻿using Supervisor.Application.Common.Errors;
 using Supervisor.Application.Services;
-using Supervisor.Application.Services.ProcessProfile;
+using Supervisor.Application.Services.Process;
+using Supervisor.Application.Services.Process.Interface;
 
 namespace Supervisor.Application.Features.Interfaces.Install;
 

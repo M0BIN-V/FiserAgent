@@ -4,14 +4,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Supervisor.Application.Common.Errors;
 using Supervisor.Application.Common.Options;
-using Supervisor.Application.Services;
+using Supervisor.Application.Services.Process;
+using Supervisor.Application.Services.Process.Runtime;
 
 namespace Supervisor.Application.Features.Runtime.StartRuntime;
 
 public class StartRuntimeHandler(
     IOptions<RuntimeOptions> options,
     IRuntimeService runtimeService,
-    IRuntimeProcessProfileService profileService,
+    RuntimeProfileService profileService,
     ProcessManagerFactory managerFactory,
     ILogger<StartRuntimeHandler> logger) :
     Handler<StartRuntimeRequest, StartRuntimeResponse>
@@ -23,17 +24,17 @@ public class StartRuntimeHandler(
     {
         if (!runtimeService.RunIsTimeInstalled()) return new RuntimeIsNotInstalledError();
 
-        RuntimeProcessProfile profile = null!;
+        RuntimeProcessProfile profile;
 
         if (profileService.ProfileExists()) profile = await profileService.GetProfileAsync(ct);
-
-        profile = new RuntimeProcessProfile
-        {
-            PipeName = Guid.CreateVersion7().ToString("N"),
-            ProcessId = 0,
-            ProcessName = null,
-            Url = null
-        };
+        else
+            profile = new RuntimeProcessProfile
+            {
+                PipeName = Guid.CreateVersion7().ToString("N"),
+                ProcessId = 0,
+                ProcessName = null,
+                Url = null
+            };
 
         var manager = managerFactory.Create(profile);
 

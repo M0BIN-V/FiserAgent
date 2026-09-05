@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Supervisor.Application.Common.Extensions;
 using Supervisor.Application.Features.Runtime.Shutdown;
 using Supervisor.Application.Services;
-using Supervisor.Application.Services.ProcessProfile;
+using Supervisor.Application.Services.Process;
+using Supervisor.Application.Services.Process.Interface;
+using Supervisor.Application.Services.Process.Runtime;
 using Supervisor.Infra.Services;
 
 namespace Supervisor.Cli;
@@ -36,7 +38,6 @@ public static class ServiceInstaller
         services.AddScoped<IRuntimeRegistry, DebugRuntimeRegistry>();
         services.AddScoped<IInterfaceRegistry, DebugInterfaceRegistry>();
 #endif
-        services.AddScoped<IRuntimeProcessProfileService, RuntimeProcessProfileService>();
 
         return builder;
     }
