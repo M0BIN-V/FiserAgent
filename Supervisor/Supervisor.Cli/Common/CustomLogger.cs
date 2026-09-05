@@ -27,7 +27,7 @@ public sealed class CustomLogger(string categoryName) : ILogger
 
         Console.CursorLeft = 0;
         Disable($"[{DateTimeOffset.Now:HH:mm:ss}]", false);
-        Disable($"[{logLevel}]" , false);
+        Disable($"[{logLevel}]", false);
         Disable($"[{categoryName.Split('.').Last()}]");
         Disable(message);
         Disable("----------------------------------");

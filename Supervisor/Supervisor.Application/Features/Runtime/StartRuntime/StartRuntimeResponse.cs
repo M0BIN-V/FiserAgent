@@ -5,5 +5,5 @@ namespace Supervisor.Application.Features.Runtime.StartRuntime;
 [GenerateOneOf]
 public partial class StartRuntimeResponse : OneOfBase<
     Uri,
-    RuntimeIsNotInstalledError ,
+    RuntimeIsNotInstalledError,
     RuntimeIsAlreadyRunningError>;
