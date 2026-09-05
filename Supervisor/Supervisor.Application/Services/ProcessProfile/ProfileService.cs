@@ -9,6 +9,21 @@ public class RuntimeProfileService(IOptions<RuntimeOptions> options) : ProfileSe
     protected override string ProfileFilePath { get; } = options.Value.ProcessProfile;
 }
 
+public class InterfaceProcessProfile : ProcessProfile;
+
+public class InterfaceProfileService(string profileFilePath) : ProfileService<InterfaceProcessProfile>
+{
+    protected override string ProfileFilePath { get; } = profileFilePath;
+}
+
+public class InterfaceProfileServiceFactory
+{
+    public InterfaceProfileService Create(string profileFilePath)
+    {
+        return new InterfaceProfileService(profileFilePath);
+    }
+}
+
 public abstract class ProfileService<TProcessProfile>
     where TProcessProfile : ProcessProfile
 {

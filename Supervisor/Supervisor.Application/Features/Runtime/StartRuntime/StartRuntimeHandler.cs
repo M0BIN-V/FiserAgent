@@ -1,22 +1,43 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using System.Threading.Channels;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Supervisor.Application.Common.Errors;
+using Supervisor.Application.Common.Options;
 using Supervisor.Application.Services;
 
 namespace Supervisor.Application.Features.Runtime.StartRuntime;
 
 public class StartRuntimeHandler(
+    IOptions<RuntimeOptions> options,
     IRuntimeService runtimeService,
     IRuntimeProcessProfileService profileService,
-    RuntimeProcessManager runtimeProcessManager,
-    ILogger<StartRuntimeHandler> logger) : Handler<StartRuntimeRequest, StartRuntimeResponse>
+    ProcessManagerFactory managerFactory,
+    ILogger<StartRuntimeHandler> logger) :
+    Handler<StartRuntimeRequest, StartRuntimeResponse>
 {
+    private readonly Channel<string> _output = Channel.CreateUnbounded<string>();
+
     public override async Task<StartRuntimeResponse> HandleAsync(StartRuntimeRequest request,
         CancellationToken ct = default)
     {
         if (!runtimeService.RunIsTimeInstalled()) return new RuntimeIsNotInstalledError();
 
-        if (await runtimeProcessManager.IsRunningHealthyAsync(ct))
-            return new RuntimeIsAlreadyRunningError();
+        RuntimeProcessProfile profile = null!;
+
+        if (profileService.ProfileExists()) profile = await profileService.GetProfileAsync(ct);
+
+        profile = new RuntimeProcessProfile
+        {
+            PipeName = Guid.CreateVersion7().ToString("N"),
+            ProcessId = 0,
+            ProcessName = null,
+            Url = null
+        };
+
+        var manager = managerFactory.Create(profile);
+
+        if (await manager.IsRunningHealthyAsync(ct)) return new RuntimeIsAlreadyRunningError();
 
         var env = new Dictionary<string, string>
         {
@@ -24,21 +45,62 @@ public class StartRuntimeHandler(
             ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://localhost:4317"
         };
 
-        await runtimeProcessManager.StartAsync(env, ct);
+        var process = await manager.StartProcess(options.Value.FilePath, env, OnOutput, OnError, ct);
+        profile.Url = await WaitForEndpointAsync(process, ct);
 
-        while (true)
-        {
-            var canRead = runtimeProcessManager.Output.Reader.TryRead(out var line);
-            if (!canRead) break;
-
-            logger.LogDebug(line ?? " ");
-        }
-
-        var profile = await profileService.GetProfileAsync(ct);
-
-        if (!await runtimeProcessManager.RespondsHealthyAsync(CancellationToken.None))
+        if (!await manager.IsRunningHealthyAsync(CancellationToken.None))
             throw new Exception("Runtime did not respond healthy after starting.");
 
+        await profileService.UpdateProfileAsync(profile, ct);
+
+
         return new StartRuntimeResponse(new Uri(profile.Url));
+    }
+
+    private async Task<string> WaitForEndpointAsync(Process process, CancellationToken cancellationToken)
+    {
+        await foreach (var line in _output.Reader.ReadAllAsync(cancellationToken))
+        {
+            if (TryParseEndpoint(line, out var endpoint)) return endpoint;
+
+            if (process.HasExited) throw new InvalidOperationException("Runtime exited before becoming ready.");
+        }
+
+        throw new InvalidOperationException("Runtime output ended before runtime became ready.");
+    }
+
+    private void OnOutput(object sender, DataReceivedEventArgs e)
+    {
+        if (e.Data is null) return;
+        _output.Writer.TryWrite(e.Data);
+    }
+
+    private void OnError(object sender, DataReceivedEventArgs e)
+    {
+        logger.LogError("[RUNTIME ERROR] " + e.Data);
+    }
+
+    private static bool TryParseEndpoint(string line, out string endpoint)
+    {
+        const string prefix = "Now listening on:";
+        line = line.Trim();
+
+        if (!line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            endpoint = null!;
+            return false;
+        }
+
+        var value = line[prefix.Length..].Trim();
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        {
+            endpoint = null!;
+            return false;
+        }
+
+        endpoint = uri.ToString();
+
+        return true;
     }
 }

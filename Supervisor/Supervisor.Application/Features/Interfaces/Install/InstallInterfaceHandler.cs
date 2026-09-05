@@ -1,4 +1,6 @@
 ﻿using Supervisor.Application.Common.Errors;
+using Supervisor.Application.Services;
+using Supervisor.Application.Services.ProcessProfile;
 
 namespace Supervisor.Application.Features.Interfaces.Install;
 
@@ -8,7 +10,8 @@ public record InstallInterfaceRequest(
     IProgress<ProgressUpdate>? progress = null);
 
 public class InstallInterfaceHandler(
-    IInterfaceProcessManager interfaceProcessManager,
+    ProcessManagerFactory managerFactory,
+    InterfaceProfileServiceFactory profileServiceFactory,
     IRuntimeService runtimeService,
     IInterfaceRegistry registry)
     : Handler<InstallInterfaceRequest, InstallInterfaceResponse>
@@ -24,8 +27,12 @@ public class InstallInterfaceHandler(
 
         if (@interface is null) return new InterfaceNotFoundError(request.UniqueName);
 
-        if (await interfaceProcessManager.InterfaceIsRunningAsync(request.UniqueName, ct))
-            await interfaceProcessManager.ShutdownInterfaceAsync(ct);
+        var profileService = profileServiceFactory.Create(@interface.UniqueName);
+        var profile = await profileService.GetProfileAsync(ct);
+        var manager = managerFactory.Create(profile);
+
+        if (await manager.IsRunningHealthyAsync(ct))
+            await manager.ShutdownAsync(ct);
 
         await registry.FetchAsync(request.UniqueName, @interface.Version, request.progress);
 

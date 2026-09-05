@@ -1,29 +1,22 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Supervisor.Application.Services.ProcessProfile;
 
 namespace Supervisor.Application.Services;
 
-public abstract class ProcessManager<TProcessProfile>(
-    ILogger<ProcessManager<TProcessProfile>> baseLogger,
-    PipeClient pipeClient,
-    ProfileService<TProcessProfile> profileService)
-    where TProcessProfile : ProcessProfile.ProcessProfile, new()
+public sealed class ProcessManager(
+    ProcessProfile.ProcessProfile profile,
+    ILogger<ProcessManager> baseLogger,
+    PipeClient pipeClient)
 {
-    protected readonly ProfileService<TProcessProfile> ProfileService = profileService;
-
-    protected Process? Process;
-
-    protected abstract void OnOutput(object? sender, DataReceivedEventArgs e);
-    protected abstract void OnError(object? sender, DataReceivedEventArgs e);
-
-    protected bool IsProcessRunning(TProcessProfile profile)
+    private bool IsProcessRunning()
     {
+        if (!profile.ProcessId.HasValue) return false;
+
         try
         {
-            baseLogger.LogDebug($"connecting to process : {profile.ProcessId}");
-            using var process = Process.GetProcessById(profile.ProcessId);
+            baseLogger.LogDebug($"Connecting to process : {profile.ProcessId}");
+            using var process = Process.GetProcessById(profile.ProcessId.Value);
 
             return !process.HasExited &&
                    string.Equals(process.ProcessName, profile.ProcessName, StringComparison.OrdinalIgnoreCase);
@@ -41,16 +34,9 @@ public abstract class ProcessManager<TProcessProfile>(
         }
     }
 
-    public virtual async Task<bool> IsRunningHealthyAsync(CancellationToken ct)
+    public async Task<bool> IsRunningHealthyAsync(CancellationToken ct)
     {
-        baseLogger.LogDebug("Validating profile file");
-        if (!ProfileService.ProfileExists()) return false;
-
-        var profile = await ProfileService.GetProfileAsync(ct);
-
-        var processIsRunning = IsProcessRunning(profile);
-
-        if (!processIsRunning) return false;
+        if (!IsProcessRunning()) return false;
 
         var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -76,47 +62,47 @@ public abstract class ProcessManager<TProcessProfile>(
             await pipeClient.DisposeAsync();
         }
 
-        return processIsRunning;
+        return true;
     }
 
-    protected async Task StartProcess(string filePath, Dictionary<string, string> environmentVariables,
-        CancellationToken ct)
+    public async Task<Process> StartProcess(
+        string filePath,
+        Dictionary<string, string> environmentVariables,
+        DataReceivedEventHandler? onOutput = null,
+        DataReceivedEventHandler? onError = null,
+        CancellationToken ct = default)
     {
-        if (await IsRunningHealthyAsync(ct)) throw new InvalidOperationException("Process is already running.");
+        if (await IsRunningHealthyAsync(ct))
+            throw new InvalidOperationException("Process is already running.");
 
-        var pipeName = Guid.NewGuid().ToString("N");
+        var process = InitProcess(filePath, environmentVariables);
 
-        InitProcess(filePath, pipeName, environmentVariables);
+        process.OutputDataReceived += onOutput;
+        process.ErrorDataReceived += onError;
 
-        if (!Process!.Start()) throw new InvalidOperationException($"Failed to start process : {Process.ProcessName}");
+        if (!process.Start()) throw new InvalidOperationException($"Failed to start process : {process.ProcessName}");
 
-        TProcessProfile profile;
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
 
-        if (ProfileService.ProfileExists()) profile = await ProfileService.GetProfileAsync(ct);
-        else profile = new TProcessProfile();
+        profile.ProcessName = process.ProcessName;
+        profile.ProcessId = process.Id;
 
-        Process.BeginOutputReadLine();
-        Process.BeginErrorReadLine();
-
-        profile.PipeName = pipeName;
-        profile.ProcessName = Process.ProcessName;
-        profile.ProcessId = Process.Id;
-
-        await ProfileService.UpdateProfileAsync(profile, ct);
+        return process;
     }
 
     public async Task ShutdownAsync(CancellationToken ct)
     {
-        var profile = await ProfileService.GetProfileAsync(ct);
         await pipeClient.ConnectAsync(profile.PipeName, ct);
-
         await pipeClient.ShutdownAsync(ct);
         await pipeClient.DisposeAsync();
     }
 
-    private void InitProcess(string filePath, string pipeName, Dictionary<string, string> environmentVariables)
+    private Process InitProcess(
+        string filePath,
+        Dictionary<string, string> environmentVariables)
     {
-        environmentVariables.Add("SUPERVISOR_PIPE_NAME", pipeName);
+        environmentVariables.Add("SUPERVISOR_PIPE_NAME", profile.PipeName);
 
         var startInfo = new ProcessStartInfo
         {
@@ -129,13 +115,22 @@ public abstract class ProcessManager<TProcessProfile>(
 
         foreach (var keyValuePair in environmentVariables) startInfo.Environment[keyValuePair.Key] = keyValuePair.Value;
 
-        Process = new Process
+        var process = new Process
         {
             StartInfo = startInfo,
             EnableRaisingEvents = true
         };
 
-        Process.OutputDataReceived += OnOutput;
-        Process.ErrorDataReceived += OnError;
+        return process;
+    }
+}
+
+public class ProcessManagerFactory(
+    ILogger<ProcessManager> processManagerLogger,
+    PipeClient pipeClient)
+{
+    public ProcessManager Create(ProcessProfile.ProcessProfile profile)
+    {
+        return new ProcessManager(profile, processManagerLogger, pipeClient);
     }
 }

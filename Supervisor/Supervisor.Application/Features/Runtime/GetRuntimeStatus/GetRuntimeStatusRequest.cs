@@ -9,7 +9,8 @@ public record GetRuntimeStatusResponse(bool Installed, Version? Version, bool Is
 public class GetRuntimeStatusHandler(
     IRuntimeProcessProfileService profileService,
     IRuntimeService runtimeService,
-    RuntimeProcessManager runtimeProcessManager) :
+    ProcessManagerFactory managerFactory,
+    RuntimeClient runtimeClient) :
     Handler<GetRuntimeStatusRequest, GetRuntimeStatusResponse>
 {
     public override async Task<GetRuntimeStatusResponse> HandleAsync(GetRuntimeStatusRequest request,
@@ -19,23 +20,23 @@ public class GetRuntimeStatusHandler(
 
         if (!isInstalled) return new GetRuntimeStatusResponse(isInstalled, null, false, null);
 
-        var versionResult = runtimeService.GetRuntimeVersionAsync();
-        var isRunningResult = runtimeProcessManager.IsRunningHealthyAsync(ct);
+        var profile = await profileService.GetProfileAsync(ct);
 
-        await Task.WhenAll(versionResult, isRunningResult);
+        var manager = managerFactory.Create(profile);
+        var processIsRunning = await manager.IsRunningHealthyAsync(ct);
+
+        var version = await runtimeService.GetRuntimeVersionAsync();
+
+        if (!processIsRunning) return new GetRuntimeStatusResponse(isInstalled, version, false, null);
+
+
+        var isRunning = await runtimeClient.RespondsHealthyAsync(ct);
+
 
         Uri? endpoint = null;
 
-        if (isRunningResult.Result)
-        {
-            var profile = await profileService.GetProfileAsync(ct);
-            endpoint = new Uri(profile.Url);
-        }
+        if (isRunning) endpoint = new Uri(profile.Url!);
 
-        return new GetRuntimeStatusResponse(
-            isInstalled,
-            versionResult.Result,
-            isRunningResult.Result,
-            endpoint);
+        return new GetRuntimeStatusResponse(isInstalled, version, isRunning, endpoint);
     }
 }

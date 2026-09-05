@@ -1,4 +1,5 @@
 ﻿using Supervisor.Application.Services;
+using Supervisor.Application.Services.ProcessProfile;
 
 namespace Supervisor.Application.Features.Runtime.InstallRuntime;
 
@@ -7,15 +8,18 @@ public record InstallRuntimeRequest(Version? Version = null, IProgress<ProgressU
 public record InstallRuntimeResponse(Version installedVersion);
 
 public class InstallRuntimeHandler(
+    ProcessManagerFactory managerFactory,
     IRuntimeRegistry registry,
-    RuntimeProcessManager processManager) : Handler<InstallRuntimeRequest, InstallRuntimeResponse>
+    RuntimeProfileService profileService) : Handler<InstallRuntimeRequest, InstallRuntimeResponse>
 {
     public override async Task<InstallRuntimeResponse> HandleAsync(InstallRuntimeRequest request,
         CancellationToken ct = default)
     {
-        
-        if (await processManager.IsRunningHealthyAsync(ct)) await processManager.ShutdownAsync(ct);
-        
+        var profile = await profileService.GetProfileAsync(ct);
+        var manager = managerFactory.Create(profile);
+
+        if (await manager.IsRunningHealthyAsync(ct)) await manager.ShutdownAsync(ct);
+
         var version = request.Version ?? await registry.GetLatestRuntimeVersionAsync();
 
         await registry.FetchRuntimeAsync(version, request.progress);

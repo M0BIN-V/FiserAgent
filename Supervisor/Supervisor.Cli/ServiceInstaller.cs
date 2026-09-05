@@ -24,11 +24,14 @@ public static class ServiceInstaller
 
         services.AddScoped<ProfileService<RuntimeProcessProfile>, RuntimeProfileService>();
 
+        services.AddScoped<InterfaceProfileServiceFactory>();
+
         services.AddSingleton<PipeClient>();
-        services.AddScoped<InterfaceProcessManager>();
+        services.AddScoped<RuntimeProfileService>();
+        services.AddScoped<ProcessManagerFactory>();
         services.AddScoped<IRuntimeService, RuntimeService>();
-        services.AddScoped<RuntimeProcessManager>();
-        services.AddHttpClient<RuntimeProcessManager>(client => client.Timeout = TimeSpan.FromMinutes(5));
+        services.AddScoped<RuntimeClient>();
+        services.AddHttpClient<RuntimeClient>(client => client.Timeout = TimeSpan.FromMinutes(5));
 #if DEBUG
         services.AddScoped<IRuntimeRegistry, DebugRuntimeRegistry>();
         services.AddScoped<IInterfaceRegistry, DebugInterfaceRegistry>();

@@ -15,7 +15,7 @@ public partial class StartInterfacesResponse : OneOfBase<
     InterfaceIsAlreadyRunningError>;
 
 public class StartInterfacesHandler(
-    InterfaceProcessManager processManager,
+    ProcessManagerFactory managerFactory,
     IInterfaceService interfaceService) :
     Handler<StartInterfacesRequest, StartInterfacesResponse>
 {
@@ -30,7 +30,7 @@ public class StartInterfacesHandler(
         //     return new InterfaceIsAlreadyRunningError(request.interfaceUniqueName);
         //
         //  await processManager.(request.interfaceUniqueName);
-        
+
         throw new NotImplementedException("Starting interfaces is not implemented yet.");
     }
 }
