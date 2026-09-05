@@ -1,4 +1,6 @@
-﻿namespace Supervisor.Cli.Helpers.Tui;
+﻿using Spectre.Console;
+
+namespace Supervisor.Cli.Helpers.Tui;
 
 public static class ConsoleUi
 {
@@ -308,10 +310,18 @@ public static class ConsoleUi
     // Spinner
     // ─────────────────────────────────────────────
 
-    public static Spinner StartSpinner(
-        string message)
+    public static Task StartSpinnerAsync(string message, Func<Task> func)
     {
-        return new Spinner(message);
+        return AnsiConsole.Status()
+            .Spinner(Spinner.Known.DotsCircle)
+            .StartAsync("Checking runtime status...", ctx => func());
+    }
+    
+    public static Task<T> StartSpinnerAsync<T>(string message, Func<Task<T>> func)
+    {
+        return AnsiConsole.Status()
+            .Spinner(Spinner.Known.DotsCircle)
+            .StartAsync("Checking runtime status...", ctx => func());
     }
 
 

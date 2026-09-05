@@ -12,8 +12,8 @@ public abstract class ProcessManager<TProcessProfile>(
     where TProcessProfile : ProcessProfile.ProcessProfile, new()
 {
     protected readonly ProfileService<TProcessProfile> ProfileService = profileService;
+
     protected Process? Process;
-    protected abstract string FilePath { get; set; }
 
     protected abstract void OnOutput(object? sender, DataReceivedEventArgs e);
     protected abstract void OnError(object? sender, DataReceivedEventArgs e);
@@ -58,7 +58,7 @@ public abstract class ProcessManager<TProcessProfile>(
         {
             await pipeClient.ConnectAsync(profile.PipeName, timeoutCts.Token);
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
             return false;
         }
@@ -79,15 +79,16 @@ public abstract class ProcessManager<TProcessProfile>(
         return processIsRunning;
     }
 
-    protected async Task StartProcess(Dictionary<string, string> environmentVariables, CancellationToken ct)
+    protected async Task StartProcess(string filePath, Dictionary<string, string> environmentVariables,
+        CancellationToken ct)
     {
         if (await IsRunningHealthyAsync(ct)) throw new InvalidOperationException("Process is already running.");
 
         var pipeName = Guid.NewGuid().ToString("N");
 
-        InitProcess(pipeName, environmentVariables);
+        InitProcess(filePath, pipeName, environmentVariables);
 
-        if (!Process!.Start()) throw new InvalidOperationException($"Failed to start process : {FilePath}");
+        if (!Process!.Start()) throw new InvalidOperationException($"Failed to start process : {Process.ProcessName}");
 
         TProcessProfile profile;
 
@@ -113,13 +114,13 @@ public abstract class ProcessManager<TProcessProfile>(
         await pipeClient.DisposeAsync();
     }
 
-    private void InitProcess(string pipeName, Dictionary<string, string> environmentVariables)
+    private void InitProcess(string filePath, string pipeName, Dictionary<string, string> environmentVariables)
     {
         environmentVariables.Add("SUPERVISOR_PIPE_NAME", pipeName);
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = FilePath,
+            FileName = filePath,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

@@ -37,16 +37,13 @@ public class InterfacesCommand : ICommand
 
                     var selected = Select("select interface to install", interfaceNames);
 
-                    InstallInterfaceResponse result;
-
-                    using (StartSpinner($"installing {selected}"))
+                    var result = await StartSpinnerAsync($"installing {selected}", () =>
                     {
-                        result =
-                            await installHandler.HandleAsync(new InstallInterfaceRequest(
-                                selected,
-                                getResult.Interfaces.Single(i => i.UniqueName == selected).version
-                            ));
-                    }
+                        return installHandler.HandleAsync(new InstallInterfaceRequest(
+                            selected,
+                            getResult.Interfaces.Single(i => i.UniqueName == selected).version
+                        ));
+                    });
 
                     result.Switch(
                         version => Success($"{selected} v{version} installed"),

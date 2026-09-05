@@ -8,13 +8,12 @@ public class StatusCommand : ICommand
     {
         builder.AddCommand("status", async (GetRuntimeStatusHandler handler) =>
             {
-                GetRuntimeStatusResponse status;
-                using (StartSpinner("Checking runtime status..."))
+                var status = await StartSpinnerAsync("Checking runtime status...", () =>
                 {
                     var ctSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    return handler.HandleAsync(new GetRuntimeStatusRequest(), ctSource.Token);
+                });
 
-                    status = await handler.HandleAsync(new GetRuntimeStatusRequest(), ctSource.Token);
-                }
 
                 if (!status.Installed)
                 {

@@ -50,13 +50,8 @@ public class RuntimeCommands : ICommand
             sub.AddCommand("stop", async (
                     [FromService] ShutdownRuntimeHandler runtimeHandler) =>
                 {
-                    ShutdownRuntimeResponse runtimeResponse;
-
-                    using (StartSpinner("shutting down..."))
-                    {
-                        runtimeResponse =
-                            await runtimeHandler.HandleAsync(new ShutdownRuntimeRequest(), CancellationToken.None);
-                    }
+                    var runtimeResponse = await StartSpinnerAsync("shutting down...", () =>
+                        runtimeHandler.HandleAsync(new ShutdownRuntimeRequest(), CancellationToken.None));
 
                     if (runtimeResponse.runtimeWasNotRunning)
                         Warning("runtime is not running.");
