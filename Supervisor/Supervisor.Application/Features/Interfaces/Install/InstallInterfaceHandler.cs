@@ -5,7 +5,7 @@ namespace Supervisor.Application.Features.Interfaces.Install;
 public record InstallInterfaceRequest(
     string UniqueName,
     Version Version,
-    IProgress<double>? progress = null);
+    IProgress<ProgressUpdate>? progress = null);
 
 public class InstallInterfaceHandler(
     IInterfaceProcessManager interfaceProcessManager,

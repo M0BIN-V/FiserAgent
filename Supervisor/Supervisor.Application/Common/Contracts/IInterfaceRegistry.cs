@@ -12,5 +12,5 @@ public interface IInterfaceRegistry
         Version runtimeVersion,
         CancellationToken ct = default);
 
-    Task FetchAsync(string uniqueName, Version version, IProgress<double>? progress = null);
+    Task FetchAsync(string uniqueName, Version version, IProgress<ProgressUpdate>? progress = null);
 }

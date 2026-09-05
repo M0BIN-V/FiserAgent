@@ -57,7 +57,7 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
             i.UniqueName.Equals(uniqueName, StringComparison.CurrentCultureIgnoreCase));
     }
 
-    public async Task FetchAsync(string uniqueName, Version version, IProgress<double>? progress = null)
+    public async Task FetchAsync(string uniqueName, Version version, IProgress<ProgressUpdate>? progress = null)
     {
         var buildDirectory = GetInterfaceBuildDirectory(uniqueName, version);
 

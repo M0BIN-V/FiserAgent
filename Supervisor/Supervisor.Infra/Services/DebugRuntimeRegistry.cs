@@ -39,7 +39,7 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
         return new Version(manifest!.Version);
     }
 
-    public async Task FetchRuntimeAsync(Version version, IProgress<double>? progress = null)
+    public async Task FetchRuntimeAsync(Version version, IProgress<ProgressUpdate>? progress = null)
     {
         var runtimeFolder = _runtimeOptions.FolderPath;
         await FileHelpers.CopyDirectoryAsync(_runtimeBuildFolder, runtimeFolder, progress);

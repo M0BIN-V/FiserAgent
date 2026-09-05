@@ -1,11 +1,13 @@
-﻿namespace Supervisor.Infra.Helpers;
+﻿using Supervisor.Application.Common.Contracts;
+
+namespace Supervisor.Infra.Helpers;
 
 public static class FileHelpers
 {
     public static async Task CopyDirectoryAsync(
         string sourceDirectory,
         string destinationDirectory,
-        IProgress<double>? progress = null,
+        IProgress<ProgressUpdate>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(sourceDirectory))
@@ -66,9 +68,7 @@ public static class FileHelpers
 
                 copiedBytes += bytesRead;
 
-                var percentage = totalBytes == 0 ? 100 : (double)copiedBytes / totalBytes * 100;
-
-                progress?.Report(percentage);
+                progress?.Report(new ProgressUpdate(copiedBytes, totalBytes));
             }
         }
     }

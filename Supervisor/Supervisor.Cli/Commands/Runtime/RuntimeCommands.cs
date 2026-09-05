@@ -36,12 +36,8 @@ public class RuntimeCommands : ICommand
 
                     var ct = CancellationToken.None;
 
-                    InstallRuntimeResponse result;
-
-                    var progress = Progress("installing runtime");
-
-                    result = await handler.HandleAsync(
-                        new InstallRuntimeRequest(progress: progress), ct);
+                    var result = await StartProgress("installing runtime", progress =>
+                        handler.HandleAsync(new InstallRuntimeRequest(null, progress), ct));
 
                     Success($"runtime v{result.installedVersion} installed.");
                 })

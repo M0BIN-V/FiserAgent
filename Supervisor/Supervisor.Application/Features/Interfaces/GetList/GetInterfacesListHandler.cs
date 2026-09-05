@@ -2,7 +2,7 @@
 
 public record GetInterfacesRequest;
 
-public record ViewInterface(string UniqueName, string Name, Version version);
+public record ViewInterface(string UniqueName, string Name, Version Version);
 
 public record GetInterfacesResponse(List<ViewInterface> Interfaces);
 

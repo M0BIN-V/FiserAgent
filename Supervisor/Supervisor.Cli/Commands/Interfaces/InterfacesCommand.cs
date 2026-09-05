@@ -1,5 +1,6 @@
 ﻿using Supervisor.Application.Features.Interfaces.GetList;
 using Supervisor.Application.Features.Interfaces.Install;
+using Supervisor.Cli.Helpers.Tui;
 
 namespace Supervisor.Cli.Commands.Interfaces;
 
@@ -13,14 +14,20 @@ public class InterfacesCommand : ICommand
                 {
                     var response = await handler.HandleAsync(new GetInterfacesRequest(), CancellationToken.None);
 
+
                     if (response.Interfaces.Count == 0)
                     {
                         Warning("No interfaces found.");
                         return;
                     }
 
-                    foreach (var iface in response.Interfaces)
-                        Console.WriteLine($"- {iface.Name} ({iface.UniqueName})");
+                    var table = new Table()
+                        .AddColumns("Unique name", "Name", "Version");
+
+                    foreach (var @interface in response.Interfaces)
+                        table.AddRow(@interface.UniqueName, @interface.Name, @interface.Version.ToString());
+
+                    table.Print();
                 })
                 .WithDescription("list all agent interfaces");
 
@@ -41,7 +48,7 @@ public class InterfacesCommand : ICommand
                     {
                         return installHandler.HandleAsync(new InstallInterfaceRequest(
                             selected,
-                            getResult.Interfaces.Single(i => i.UniqueName == selected).version
+                            getResult.Interfaces.Single(i => i.UniqueName == selected).Version
                         ));
                     });
 

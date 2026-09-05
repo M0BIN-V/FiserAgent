@@ -298,11 +298,22 @@ public static class ConsoleUi
     // Progress
     // ─────────────────────────────────────────────
 
-    public static ProgressBar Progress(
-        string title,
-        int width = 40)
+    public static Task<T> StartProgress<T>(string title, Func<IProgress<ProgressUpdate>, Task<T>> action)
     {
-        return new ProgressBar(title, width);
+        return AnsiConsole.Progress().StartAsync(ctx =>
+        {
+            var task = ctx.AddTask(title);
+
+            var progress = new Progress<ProgressUpdate>(update =>
+            {
+                task.MaxValue = update.Total;
+                task.Value = update.Current;
+
+                if (!string.IsNullOrWhiteSpace(update.Message)) task.Description = update.Message;
+            });
+
+            return action(progress);
+        });
     }
 
 
@@ -316,7 +327,7 @@ public static class ConsoleUi
             .Spinner(Spinner.Known.DotsCircle)
             .StartAsync("Checking runtime status...", ctx => func());
     }
-    
+
     public static Task<T> StartSpinnerAsync<T>(string message, Func<Task<T>> func)
     {
         return AnsiConsole.Status()
@@ -328,74 +339,32 @@ public static class ConsoleUi
     // ─────────────────────────────────────────────
     // Table
     // ─────────────────────────────────────────────
+}
 
-    public static void Table(
-        IReadOnlyList<string> headers,
-        IReadOnlyList<IReadOnlyList<string>> rows)
+public class Table
+{
+    public List<string> Columns { get; } = [];
+    public List<List<string>> Rows { get; } = [];
+
+    public Table AddColumns(params string[] columns)
     {
-        if (headers.Count == 0)
-            return;
-
-        var widths = new int[headers.Count];
-
-        for (var i = 0; i < headers.Count; i++)
-        {
-            widths[i] = headers[i].Length;
-
-            foreach (var row in rows)
-                if (i < row.Count)
-                    widths[i] = Math.Max(
-                        widths[i],
-                        row[i].Length);
-        }
-
-        PrintTableSeparator(widths);
-
-        PrintTableRow(headers, widths);
-
-        PrintTableSeparator(widths);
-
-        foreach (var row in rows)
-            PrintTableRow(row, widths);
-
-        PrintTableSeparator(widths);
+        Columns.AddRange(columns);
+        return this;
     }
 
-
-    private static void PrintTableSeparator(
-        int[] widths)
+    public void AddRow(params string[] values)
     {
-        Console.Write("+");
-
-        foreach (var width in widths)
-        {
-            Console.Write(
-                new string('-', width + 2));
-
-            Console.Write("+");
-        }
-
-        Console.WriteLine();
+        Rows.Add(values.ToList());
     }
 
-
-    private static void PrintTableRow(
-        IReadOnlyList<string> values,
-        int[] widths)
+    public void Print()
     {
-        Console.Write("|");
+        var table = new Spectre.Console.Table();
+        table.RoundedBorder();
 
-        for (var i = 0; i < widths.Length; i++)
-        {
-            var value =
-                i < values.Count
-                    ? values[i]
-                    : string.Empty;
+        table.AddColumns(Columns.ToArray());
+        foreach (var row in Rows) table.AddRow(row.ToArray());
 
-            Console.Write(
-                $" {value.PadRight(widths[i])} |");
-        }
-
-        Console.WriteLine();
+        AnsiConsole.Write(table);
     }
 }

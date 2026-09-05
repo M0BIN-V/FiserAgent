@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using Supervisor.Cli;
 
 Console.OutputEncoding = Encoding.Unicode;
@@ -17,7 +18,25 @@ builder.Logging.AddProvider(new CustomLoggerProvider());
 
 builder.Logging.SetMinimumLevel(logLevel);
 
-builder
-    .Build()
-    .MapCommands()
+var app = builder.Build();
+
+app.UseFilter(async (ctx, next) =>
+{
+    try
+    {
+        return await next(ctx);
+    }
+    catch (CommandExitedException)
+    {
+        throw;
+    }
+    catch (Exception ex)
+    {
+        AnsiConsole.WriteException(ex,
+            ExceptionFormats.ShortenEverything | ExceptionFormats.ShowLinks);
+        return 1;
+    }
+});
+
+app.MapCommands()
     .Run();
