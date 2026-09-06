@@ -1,6 +1,4 @@
-﻿using Supervisor.Application.Common.Errors;
-
-namespace Supervisor.Application.Features.Runtime.StartRuntime;
+﻿namespace Supervisor.Application.Features.Runtime.StartRuntime;
 
 [GenerateOneOf]
 public partial class StartRuntimeResponse : OneOfBase<

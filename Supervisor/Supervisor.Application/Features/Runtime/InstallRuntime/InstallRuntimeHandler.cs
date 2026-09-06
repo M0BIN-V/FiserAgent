@@ -1,4 +1,5 @@
-﻿using Supervisor.Application.Services.Process;
+﻿using Supervisor.Application.Common.Contracts.Process;
+using Supervisor.Application.Services.Process;
 using Supervisor.Application.Services.Process.Runtime;
 
 namespace Supervisor.Application.Features.Runtime.InstallRuntime;
@@ -8,7 +9,7 @@ public record InstallRuntimeRequest(Version? Version = null, IProgress<ProgressU
 public record InstallRuntimeResponse(Version installedVersion);
 
 public class InstallRuntimeHandler(
-    ProcessManagerFactory managerFactory,
+    IProcessManagerFactory managerFactory,
     IRuntimeRegistry registry,
     RuntimeProfileService profileService) : Handler<InstallRuntimeRequest, InstallRuntimeResponse>
 {

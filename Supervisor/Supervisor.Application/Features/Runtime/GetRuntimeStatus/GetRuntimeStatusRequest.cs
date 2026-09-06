@@ -1,4 +1,4 @@
-﻿using Supervisor.Application.Services;
+﻿using Supervisor.Application.Common.Contracts.Process;
 using Supervisor.Application.Services.Process;
 using Supervisor.Application.Services.Process.Runtime;
 
@@ -11,7 +11,7 @@ public record GetRuntimeStatusResponse(bool Installed, Version? Version, bool Is
 public class GetRuntimeStatusHandler(
     RuntimeProfileService profileService,
     IRuntimeService runtimeService,
-    ProcessManagerFactory managerFactory,
+    IProcessManagerFactory managerFactory,
     RuntimeClient runtimeClient) :
     Handler<GetRuntimeStatusRequest, GetRuntimeStatusResponse>
 {

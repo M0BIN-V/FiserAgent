@@ -1,39 +1,18 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Supervisor.Application.Common.Contracts;
+using Supervisor.Application.Common.Contracts.Process;
+using Supervisor.Application.Common.Extensions;
+using Supervisor.Application.Services.Process;
 
-namespace Supervisor.Application.Services.Process;
+namespace Supervisor.Infra.Services;
 
 public sealed class ProcessManager(
     ProcessProfile profile,
     ILogger<ProcessManager> baseLogger,
-    PipeClient pipeClient)
+    IPipeClient pipeClient) : IProcessManager
 {
-    private bool IsProcessRunning()
-    {
-        if (!profile.ProcessId.HasValue) return false;
-
-        try
-        {
-            baseLogger.LogDebug($"Connecting to process : {profile.ProcessId}");
-            using var process = System.Diagnostics.Process.GetProcessById(profile.ProcessId.Value);
-
-            return !process.HasExited &&
-                   string.Equals(process.ProcessName, profile.ProcessName, StringComparison.OrdinalIgnoreCase);
-        }
-        catch (ArgumentException e)
-        {
-            baseLogger.LogDebug(e.Message);
-            return false;
-        }
-        catch (Win32Exception ex) when (ex.NativeErrorCode == 5)
-        {
-            // Access denied
-            baseLogger.LogDebug(ex.Message);
-            return false;
-        }
-    }
-
     public async Task<bool> IsRunningHealthyAsync(CancellationToken ct)
     {
         if (!IsProcessRunning()) return false;
@@ -65,7 +44,7 @@ public sealed class ProcessManager(
         return true;
     }
 
-    public async Task<System.Diagnostics.Process> StartProcess(
+    public async Task<Process> StartProcess(
         string filePath,
         Dictionary<string, string> environmentVariables,
         DataReceivedEventHandler? onOutput = null,
@@ -98,7 +77,32 @@ public sealed class ProcessManager(
         await pipeClient.DisposeAsync();
     }
 
-    private System.Diagnostics.Process InitProcess(
+    private bool IsProcessRunning()
+    {
+        if (!profile.ProcessId.HasValue) return false;
+
+        try
+        {
+            baseLogger.LogDebug($"Connecting to process : {profile.ProcessId}");
+            using var process = Process.GetProcessById(profile.ProcessId.Value);
+
+            return !process.HasExited &&
+                   string.Equals(process.ProcessName, profile.ProcessName, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (ArgumentException e)
+        {
+            baseLogger.LogDebug(e.Message);
+            return false;
+        }
+        catch (Win32Exception ex) when (ex.NativeErrorCode == 5)
+        {
+            // Access denied
+            baseLogger.LogDebug(ex.Message);
+            return false;
+        }
+    }
+
+    private Process InitProcess(
         string filePath,
         Dictionary<string, string> environmentVariables)
     {
@@ -115,22 +119,12 @@ public sealed class ProcessManager(
 
         foreach (var keyValuePair in environmentVariables) startInfo.Environment[keyValuePair.Key] = keyValuePair.Value;
 
-        var process = new System.Diagnostics.Process
+        var process = new Process
         {
             StartInfo = startInfo,
             EnableRaisingEvents = true
         };
 
         return process;
-    }
-}
-
-public class ProcessManagerFactory(
-    ILogger<ProcessManager> processManagerLogger,
-    PipeClient pipeClient)
-{
-    public ProcessManager Create(ProcessProfile profile)
-    {
-        return new ProcessManager(profile, processManagerLogger, pipeClient);
     }
 }

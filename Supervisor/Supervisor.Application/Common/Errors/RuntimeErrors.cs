@@ -5,3 +5,5 @@ public record RuntimeAlreadyInstalledError() : Error("Runtime is already install
 public record RuntimeIsNotInstalledError() : Error("Runtime is not installed.");
 
 public record RuntimeIsAlreadyRunningError() : Error("Runtime is already running");
+
+public record RuntimeIsNotRunningError() : Error("Runtime is not running.");

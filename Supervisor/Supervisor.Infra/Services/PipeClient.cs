@@ -1,17 +1,18 @@
-﻿using System.Diagnostics;
-using System.IO.Pipes;
+﻿using System.IO.Pipes;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Supervisor.Application.Common.Contracts;
+using Supervisor.Application.Services.Process;
 
-namespace Supervisor.Application.Services.Process;
+namespace Supervisor.Infra.Services;
 
-public sealed class PipeClient(ILogger<PipeClient> logger) : IAsyncDisposable
+public class PipeClient(ILogger<PipeClient> logger) : IPipeClient, IAsyncDisposable
 {
     private NamedPipeClientStream? _pipe;
     private StreamReader? _reader;
     private StreamWriter? _writer;
 
-    public bool IsConnected => _pipe?.IsConnected == true;
+    private bool IsConnected => _pipe?.IsConnected == true;
 
     public async ValueTask DisposeAsync()
     {
@@ -60,29 +61,5 @@ public sealed class PipeClient(ILogger<PipeClient> logger) : IAsyncDisposable
         if (_reader is null || !IsConnected) throw new InvalidOperationException("Pipe is not connected.");
 
         return await _reader.ReadLineAsync(cancellationToken);
-    }
-
-
-    public async Task<TimeSpan> PingAsync(
-        CancellationToken cancellationToken = default)
-    {
-        logger.LogDebug("pinging pipe");
-        var stopwatch = Stopwatch.StartNew();
-
-        await SendAsync("ping", cancellationToken);
-
-        var response = await ReceiveAsync(cancellationToken);
-
-        stopwatch.Stop();
-
-        if (response != "pong") throw new InvalidOperationException($"Unexpected ping response: {response}");
-
-        return stopwatch.Elapsed;
-    }
-
-    public async Task ShutdownAsync(CancellationToken cancellationToken = default)
-    {
-        logger.LogDebug("sending shutdown command");
-        await SendAsync("shutdown", cancellationToken);
     }
 }

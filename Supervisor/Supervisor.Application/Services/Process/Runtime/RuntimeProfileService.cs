@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using Supervisor.Application.Common.Options;
-
-namespace Supervisor.Application.Services.Process.Runtime;
+﻿namespace Supervisor.Application.Services.Process.Runtime;
 
 public class RuntimeProfileService(IOptions<RuntimeOptions> options) : ProfileService<RuntimeProcessProfile>
 {

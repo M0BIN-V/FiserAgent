@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Supervisor.Application.Common.Contracts.Process;
 using Supervisor.Application.Features.Shutdown;
-using Supervisor.Application.Services;
 using Supervisor.Application.Services.Process;
 using Supervisor.Application.Services.Process.Runtime;
 
@@ -10,7 +9,7 @@ public record ShutdownRuntimeResponse(bool runtimeWasNotRunning);
 
 public class ShutdownRuntimeHandler(
     ILogger<ShutdownRuntimeHandler> logger,
-    ProcessManagerFactory managerFactory,
+    IProcessManagerFactory managerFactory,
     RuntimeProfileService profileService,
     RuntimeClient runtimeClient) : Handler<ShutdownRuntimeRequest, ShutdownRuntimeResponse>
 {

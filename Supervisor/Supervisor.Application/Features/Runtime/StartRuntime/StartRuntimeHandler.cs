@@ -1,10 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Channels;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Supervisor.Application.Common.Errors;
-using Supervisor.Application.Common.Options;
-using Supervisor.Application.Services.Process;
+using Supervisor.Application.Common.Contracts.Process;
 using Supervisor.Application.Services.Process.Runtime;
 
 namespace Supervisor.Application.Features.Runtime.StartRuntime;
@@ -13,7 +9,7 @@ public class StartRuntimeHandler(
     IOptions<RuntimeOptions> options,
     IRuntimeService runtimeService,
     RuntimeProfileService profileService,
-    ProcessManagerFactory managerFactory,
+    IProcessManagerFactory managerFactory,
     ILogger<StartRuntimeHandler> logger) :
     Handler<StartRuntimeRequest, StartRuntimeResponse>
 {

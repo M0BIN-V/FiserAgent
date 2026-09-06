@@ -18,6 +18,8 @@ app.UseHttpsRedirection();
 
 app.MapDefaultEndpoints();
 
+app.MapPost("completion", (string message) => { return TypedResults.Ok("your message : " + message); });
+
 app.MapPost("test", () =>
 {
     return TypedResults.ServerSentEvents(Events());

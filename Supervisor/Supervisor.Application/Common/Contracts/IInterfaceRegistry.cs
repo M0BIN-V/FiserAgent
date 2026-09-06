@@ -1,6 +1,4 @@
-﻿using Supervisor.Domain.Entities;
-
-namespace Supervisor.Application.Common.Contracts;
+﻿namespace Supervisor.Application.Common.Contracts;
 
 public interface IInterfaceRegistry
 {
