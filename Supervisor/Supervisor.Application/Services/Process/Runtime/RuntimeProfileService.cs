@@ -1,6 +1,8 @@
-﻿namespace Supervisor.Application.Services.Process.Runtime;
+﻿using Supervisor.Application.Common.Settings;
 
-public class RuntimeProfileService(IOptions<RuntimeOptions> options) : ProfileService<RuntimeProcessProfile>
+namespace Supervisor.Application.Services.Process.Runtime;
+
+public class RuntimeProfileService(RuntimeSettings settings) : ProfileService<RuntimeProcessProfile>
 {
-    protected override string ProfileFilePath { get; } = options.Value.ProcessProfile;
+    protected override string ProfileFilePath { get; } = settings.ProcessProfile;
 }

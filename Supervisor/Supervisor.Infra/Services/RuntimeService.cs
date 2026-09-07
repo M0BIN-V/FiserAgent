@@ -1,19 +1,17 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Supervisor.Application.Common.Contracts;
 using Supervisor.Application.Common.Options;
+using Supervisor.Application.Common.Settings;
 
 namespace Supervisor.Infra.Services;
 
 //TODO Manages the installed runtime and its version.
 
-public class RuntimeService(IOptions<RuntimeOptions> runtimeOptions) : IRuntimeService
+public class RuntimeService(RuntimeSettings runtimeSettings) : IRuntimeService
 {
-    private readonly RuntimeOptions _runtimeOptions = runtimeOptions.Value;
-
     public async Task<Version?> GetRuntimeVersionAsync()
     {
-        var manifestString = await File.ReadAllTextAsync(_runtimeOptions.ManifestPath);
+        var manifestString = await File.ReadAllTextAsync(runtimeSettings.ManifestPath);
 
         if (string.IsNullOrWhiteSpace(manifestString))
             return null;
@@ -27,9 +25,9 @@ public class RuntimeService(IOptions<RuntimeOptions> runtimeOptions) : IRuntimeS
 
     public bool RunIsTimeInstalled()
     {
-        if (!Directory.Exists(_runtimeOptions.FolderPath)) return false;
+        if (!Directory.Exists(runtimeSettings.DirectoryPath)) return false;
 
-        if (!File.Exists(_runtimeOptions.FilePath)) return false;
+        if (!File.Exists(runtimeSettings.BinaryPath)) return false;
 
         return true;
     }

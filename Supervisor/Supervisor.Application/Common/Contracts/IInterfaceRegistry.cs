@@ -2,9 +2,9 @@
 
 public interface IInterfaceRegistry
 {
-    public Task<List<Interface>> GetInterfaces(Version runtimeVersion, CancellationToken ct = default);
+    public Task<List<InterfaceManifest>> GetInterfaces(Version runtimeVersion, CancellationToken ct = default);
 
-    Task<Interface?> GetAsync(
+    Task<InterfaceManifest?> GetAsync(
         string uniqueName,
         Version interfaceVersion,
         Version runtimeVersion,

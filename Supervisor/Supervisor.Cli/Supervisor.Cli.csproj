@@ -21,4 +21,8 @@
         <ProjectReference Include="..\Supervisor.Infra\Supervisor.Infra.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Settings.json" />
+    </ItemGroup>
+
 </Project>

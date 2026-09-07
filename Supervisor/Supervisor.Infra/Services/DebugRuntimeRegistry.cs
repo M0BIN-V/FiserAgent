@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Supervisor.Application.Common.Contracts;
 using Supervisor.Application.Common.Options;
+using Supervisor.Application.Common.Settings;
 using Supervisor.Infra.Helpers;
 
 namespace Supervisor.Infra.Services;
@@ -9,17 +9,17 @@ namespace Supervisor.Infra.Services;
 public class DebugRuntimeRegistry : IRuntimeRegistry
 {
     private readonly string _runtimeBuildFolder;
-    private readonly RuntimeOptions _runtimeOptions;
+    private readonly RuntimeSettings _runtimeSettings;
 
     public DebugRuntimeRegistry(
-        IOptions<RuntimeOptions> runtimeOptions,
-        IOptions<SupervisorOptions> supervisorOptions)
+        RuntimeSettings runtimeSettings,
+        SupervisorSettings supervisorSettings)
     {
-        _runtimeOptions = runtimeOptions.Value;
+        _runtimeSettings = runtimeSettings;
 
 
         _runtimeBuildFolder = Path.Combine(
-            supervisorOptions.Value.SupervisorProjectPath,
+            supervisorSettings.SupervisorProjectPath,
             "..",
             "..",
             "Runtime",
@@ -31,7 +31,7 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
 
     public async Task<Version> GetLatestRuntimeVersionAsync()
     {
-        var runtimeBuildManifest = Path.Combine(_runtimeBuildFolder, _runtimeOptions.ManifestFileName);
+        var runtimeBuildManifest = Path.Combine(_runtimeBuildFolder, _runtimeSettings.ManifestFileName);
 
         var manifestString = await File.ReadAllTextAsync(runtimeBuildManifest);
         var manifest = JsonSerializer.Deserialize<RuntimeManifest>(manifestString);
@@ -41,7 +41,7 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
 
     public async Task FetchRuntimeAsync(Version version, IProgress<ProgressUpdate>? progress = null)
     {
-        var runtimeFolder = _runtimeOptions.FolderPath;
+        var runtimeFolder = _runtimeSettings.DirectoryPath;
         await FileHelpers.CopyDirectoryAsync(_runtimeBuildFolder, runtimeFolder, progress);
     }
 }

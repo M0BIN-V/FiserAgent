@@ -1,5 +1,4 @@
 ﻿using Supervisor.Application.Common.Contracts.Process;
-using Supervisor.Application.Services.Process;
 using Supervisor.Application.Services.Process.Interface;
 
 namespace Supervisor.Application.Features.Interfaces.Install;
@@ -28,13 +27,18 @@ public class InstallInterfaceHandler(
         if (@interface is null) return new InterfaceNotFoundError(request.UniqueName);
 
         var profileService = profileServiceFactory.Create(@interface.UniqueName);
-        var profile = await profileService.GetProfileAsync(ct);
-        var manager = managerFactory.Create(profile);
 
-        if (await manager.IsRunningHealthyAsync(ct)) await manager.ShutdownAsync(ct);
+        
+        //stop profile if is running
+        if (profileService.ProfileExists())
+        {
+            var profile = await profileService.GetProfileAsync(ct);
+            var manager = managerFactory.Create(profile);
+            if (await manager.IsRunningHealthyAsync(ct)) await manager.ShutdownAsync(ct);
+        }
 
         await registry.FetchAsync(request.UniqueName, @interface.Version, request.progress);
-
+        
         return @interface.Version;
     }
 }

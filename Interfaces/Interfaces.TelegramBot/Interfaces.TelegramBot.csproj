@@ -16,7 +16,7 @@
         <None Update="botConfig.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="interface.json">
+        <None Update="manifest.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>

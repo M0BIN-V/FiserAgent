@@ -45,10 +45,3 @@ public class StartInterfacesHandler(
         // var interfaceManager = managerFactory
     }
 }
-
-public interface IInterfaceService
-{
-    public List<Interface> GetInstalledInterfaces();
-    public bool IsInstalled(string interfaceUniqueName);
-    public Task<Interface?> GetByUniqueNameAsync(string interfaceUniqueName);
-}

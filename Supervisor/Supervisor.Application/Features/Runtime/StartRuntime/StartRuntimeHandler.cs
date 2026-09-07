@@ -1,12 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Threading.Channels;
 using Supervisor.Application.Common.Contracts.Process;
+using Supervisor.Application.Common.Settings;
 using Supervisor.Application.Services.Process.Runtime;
 
 namespace Supervisor.Application.Features.Runtime.StartRuntime;
 
 public class StartRuntimeHandler(
-    IOptions<RuntimeOptions> options,
+    RuntimeSettings runtimeSettings,
     IRuntimeService runtimeService,
     RuntimeProfileService profileService,
     IProcessManagerFactory managerFactory,
@@ -42,7 +43,10 @@ public class StartRuntimeHandler(
             ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://localhost:4317"
         };
 
-        var process = await manager.StartProcess(options.Value.FilePath, env, OnOutput, OnError, ct);
+        var runtimeBinaryPath = runtimeSettings.BinaryPath ??
+                                throw new Exception("Runtime binary path is missing");
+
+        var process = await manager.StartProcess(runtimeBinaryPath, env, OnOutput, OnError, ct);
         profile.Url = await WaitForEndpointAsync(process, ct);
 
         if (!await manager.IsRunningHealthyAsync(CancellationToken.None))

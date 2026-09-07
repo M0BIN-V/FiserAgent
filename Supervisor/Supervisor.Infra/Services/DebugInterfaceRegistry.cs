@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using Supervisor.Application.Common.Contracts;
-using Supervisor.Application.Common.Options;
+using Supervisor.Application.Common.Settings;
 using Supervisor.Domain.Entities;
 using Supervisor.Infra.Helpers;
 
@@ -10,15 +10,22 @@ namespace Supervisor.Infra.Services;
 public class DebugInterfaceRegistry : IInterfaceRegistry
 {
     private readonly List<string> _interfaceBuildDirectories = [];
-    private readonly string _interfacesDirectoryPath;
-    private readonly SupervisorOptions _supervisorOptions;
+    private readonly string _interfacesBuildDirectoryPath;
+    private readonly InterfacesSettings _interfacesSettings;
+    private readonly ILogger<DebugInterfaceRegistry> _logger;
+    private readonly SupervisorSettings _settings;
 
-    public DebugInterfaceRegistry(IOptions<SupervisorOptions> supervisorOptions)
+    public DebugInterfaceRegistry(
+        SupervisorSettings settings,
+        ILogger<DebugInterfaceRegistry> logger,
+        InterfacesSettings interfacesSettings)
     {
-        _supervisorOptions = supervisorOptions.Value;
+        _settings = settings;
+        _logger = logger;
+        _interfacesSettings = interfacesSettings;
 
-        _interfacesDirectoryPath = Path.Combine(
-            _supervisorOptions.SupervisorProjectPath,
+        _interfacesBuildDirectoryPath = Path.Combine(
+            _settings.SupervisorProjectPath,
             "..",
             "..",
             "Interfaces");
@@ -29,16 +36,17 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
         ]);
     }
 
-    public async Task<List<Interface>> GetInterfaces(Version runtimeVersion, CancellationToken ct = default)
+    public async Task<List<InterfaceManifest>> GetInterfaces(Version runtimeVersion, CancellationToken ct = default)
     {
-        var interfaces = new List<Interface>();
+        var interfaces = new List<InterfaceManifest>();
 
         foreach (var interfaceManifestPath in _interfaceBuildDirectories
-                     .Select(buildDirectoryPath => Path.Combine(buildDirectoryPath, "interface.json"))
+                     .Select(buildDirectoryPath =>
+                         Path.Combine(buildDirectoryPath, _interfacesSettings.ManifestFileName))
                      .TakeWhile(File.Exists))
         {
             var manifestString = await File.ReadAllTextAsync(interfaceManifestPath, ct);
-            var manifest = JsonSerializer.Deserialize<Interface>(manifestString);
+            var manifest = JsonSerializer.Deserialize<InterfaceManifest>(manifestString);
 
             interfaces.Add(manifest!);
         }
@@ -46,14 +54,14 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
         return interfaces;
     }
 
-    public async Task<Interface?> GetAsync(string uniqueName, Version interfaceVersion, Version runtimeVersion,
+    public async Task<InterfaceManifest?> GetAsync(string uniqueName, Version interfaceVersion, Version runtimeVersion,
         CancellationToken ct = default)
     {
         var interfaces = await GetInterfaces(runtimeVersion, ct);
 
         return interfaces.SingleOrDefault(i =>
             i.Version == interfaceVersion &&
-            i.RequiredRuntimeVersion == runtimeVersion &&
+            i.RequiredRuntimeVersion <= runtimeVersion &&
             i.UniqueName.Equals(uniqueName, StringComparison.CurrentCultureIgnoreCase));
     }
 
@@ -63,7 +71,7 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
 
         await FileHelpers.CopyDirectoryAsync(
             buildDirectory,
-            _supervisorOptions.InterfaceInstallationPath,
+            _interfacesSettings.GenerateInstallationDirectory(uniqueName),
             progress);
     }
 
@@ -71,24 +79,35 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
         string uniqueName,
         Version version)
     {
-        return _interfaceBuildDirectories
-            .Select(buildPath => new
-            {
-                BuildPath = buildPath,
-                InterfaceManifest = JsonSerializer
-                    .Deserialize<Interface>(File
-                        .ReadAllText(Path.Combine(buildPath, "interface.json")))
-            })
+        _logger.LogDebug("getting interface manifests");
+
+        _logger.LogDebug("finding manifest files");
+
+        var manifests = _interfaceBuildDirectories.Select(buildPath => new
+        {
+            BuildPath = buildPath,
+            InterfaceManifest = JsonSerializer
+                .Deserialize<InterfaceManifest>(File
+                    .ReadAllText(Path.Combine(buildPath, _interfacesSettings.ManifestFileName)))
+        }).ToList();
+
+        _logger.LogDebug($"{manifests.Count} manifests found");
+
+        _logger.LogDebug("filtering manifests");
+
+        var filteredManifest = manifests
             .Where(a =>
                 a.InterfaceManifest!.UniqueName == uniqueName &&
                 a.InterfaceManifest.Version == version)
             .Select(a => a.BuildPath)
             .Single();
+
+        return filteredManifest;
     }
 
     private string GetBuildDirectory(string projectDirectoryName)
     {
-        return Path.Combine(_interfacesDirectoryPath,
+        return Path.Combine(_interfacesBuildDirectoryPath,
             projectDirectoryName,
             "bin",
             "Debug",

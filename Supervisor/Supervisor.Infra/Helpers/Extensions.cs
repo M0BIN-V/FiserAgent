@@ -1,11 +1,11 @@
-﻿using Supervisor.Application.Common.Options;
+﻿using Supervisor.Application.Common.Settings;
 
 namespace Supervisor.Infra.Helpers;
 
 public static class Extensions
 {
-    extension(SupervisorOptions options)
+    extension(SupervisorSettings options)
     {
-        public string SupervisorProjectPath => Path.Combine(options.Directory, "..", "..", "..");
+        public string SupervisorProjectPath => Path.Combine(options.InstallationDirectory, "..", "..", "..");
     }
 }

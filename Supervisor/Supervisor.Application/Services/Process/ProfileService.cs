@@ -2,8 +2,7 @@
 
 namespace Supervisor.Application.Services.Process;
 
-public abstract class ProfileService<TProcessProfile>
-    where TProcessProfile : ProcessProfile
+public abstract class ProfileService<TProcessProfile> where TProcessProfile : ProcessProfile
 {
     protected abstract string ProfileFilePath { get; }
 

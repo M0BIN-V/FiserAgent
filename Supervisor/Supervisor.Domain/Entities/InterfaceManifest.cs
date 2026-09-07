@@ -2,7 +2,7 @@
 
 namespace Supervisor.Domain.Entities;
 
-public class Interface
+public class InterfaceManifest
 {
     [JsonPropertyName("uniqueName")] public required string UniqueName { get; set; }
 
