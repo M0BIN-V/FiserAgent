@@ -24,4 +24,10 @@
         <ProjectReference Include="..\Runtime.Core\Runtime.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="system.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

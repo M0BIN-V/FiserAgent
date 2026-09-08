@@ -22,11 +22,13 @@ app.UseHttpsRedirection();
 
 app.MapDefaultEndpoints();
 
+var systemPrompt = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"system.md"));
+
 
 app.MapPost("completion", async (string message, IChatClient chatClient) =>
 {
     var agent = chatClient.AsAIAgent(
-        "you are a helpful assistant that answers questions in a concise and clear manner called fiser.",
+        systemPrompt,
         "fiser");
 
     var result = await agent.RunAsync(message);
