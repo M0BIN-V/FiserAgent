@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Interfaces.TelegramBot;
+using Interfaces.Sdk;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,7 +11,7 @@ using Telegram.Bot.Types.Enums;
 
 if (args.Any(a => a.Trim().Equals("--configure")))
 {
-    Console.Write("enter your bot token: ");
+    Console.Write("Enter your bot token: ");
     var token = Console.ReadLine();
 
     var config = new
@@ -43,7 +43,8 @@ var app = builder.Build();
 
 app.UseUpdateLogging();
 
-app.MapCommand("/start", () => "hi this is fiser");
+app.MapCommand("/start", () => "hi , this is fiser");
+
 
 app.MapMessage(MessageType.Text, (
     IConfiguration config,

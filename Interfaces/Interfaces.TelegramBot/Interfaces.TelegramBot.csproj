@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\ServiceDefaults\ServiceDefaults.csproj" />
+      <ProjectReference Include="..\Interfaces.Sdk\Interfaces.Sdk.csproj" />
     </ItemGroup>
 
 </Project>

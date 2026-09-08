@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Interfaces.TelegramBot;
+namespace Interfaces.Sdk;
 
 public sealed class InterfacePipeService(
     IConfiguration config,
@@ -13,7 +13,7 @@ public sealed class InterfacePipeService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var pipeName = config.GetValue<string>("SUPERVISOR_PIPE_NAME");
+        var pipeName = config["SUPERVISOR_PIPE_NAME"];
 
         if (string.IsNullOrWhiteSpace(pipeName))
             throw new InvalidOperationException(

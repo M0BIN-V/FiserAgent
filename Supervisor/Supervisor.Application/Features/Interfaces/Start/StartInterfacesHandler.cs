@@ -92,12 +92,15 @@ public class StartInterfacesHandler(
             onError: OnError,
             ct: ct);
 
+
         var timeout = new CancellationTokenSource();
         timeout.CancelAfter(TimeSpan.FromSeconds(5));
 
         while (!await processManager.IsRunningHealthyAsync(ct) && !timeout.Token.IsCancellationRequested)
         {
         }
+
+        await interfaceProfileService.UpdateProfileAsync(interfaceProfile, ct);
 
         return new InterfaceStarted();
     }
