@@ -7,11 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TeleFrame.ApplicationBuilder;
 using TeleFrame.Middlewares;
-using TeleFrame.Results;
 using TeleFrame.Services;
 using TeleFrame.UpdateHandlers.MessageHandlers;
 using TeleFrame.UpdateHandlers.MessageHandlers.CommandHandlers;
+using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 if (args.Any(a => a.Trim().Equals("--configure")))
 {
@@ -49,7 +50,17 @@ app.UseTracing();
 
 app.UseUpdateLogging();
 
-app.MapCommand("/start", () => "hi , this is fiser");
+app.MapCommand("/start", async (UpdateContext context) =>
+{
+    var botClient = context.Client;
+
+    var chatId = context.Update.Message!.Chat.Id;
+
+    await botClient.SendMessage(
+        chatId,
+        "👋 Hello! I'm your friendly AI assistant. \n Just type your message and I'll do my best to assist you! 🤖💬"
+    );
+});
 
 
 app.MapMessage(MessageType.Text, async (
@@ -60,6 +71,14 @@ app.MapMessage(MessageType.Text, async (
     var runtimeEndpoint = config["RUNTIME_ENDPOINT"] ??
                           throw new NullReferenceException("RUNTIME_ENDPOINT");
 
+    var draftId = Random.Shared.Next(1, 9999);
+
+    var chatId = ctx.Update.Message!.Chat.Id;
+    await ctx.Client.SendMessageDraft(
+        chatId,
+        draftId,
+        "⌬ Thinking");
+
     var httpClient = factory.CreateClient();
     httpClient.BaseAddress = new Uri(runtimeEndpoint);
 
@@ -68,9 +87,22 @@ app.MapMessage(MessageType.Text, async (
     var message = ctx.Update.Message!.Text;
     var result = await runtimeClient.CompletionAsync(message);
 
-    var r = Results.Reply(result);
+    var text = result.Text ?? "hihi";
 
-    await r.InvokeAsync(ctx);
+    var keyboard = new InlineKeyboardMarkup(
+    [
+        [
+            InlineKeyboardButton.WithCallbackData($"out :{result.OutputToken}"),
+            InlineKeyboardButton.WithCallbackData($"in :{result.InputToken}")
+        ]
+    ]);
+
+    await ctx.Client.SendMessageDraft(
+        chatId,
+        draftId,
+        text);
+
+    await ctx.Client.SendMessage(chatId, text, replyMarkup: keyboard);
 });
 
 app.Run();

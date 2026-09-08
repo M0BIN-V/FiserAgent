@@ -22,15 +22,28 @@ app.UseHttpsRedirection();
 
 app.MapDefaultEndpoints();
 
+
 app.MapPost("completion", async (string message, IChatClient chatClient) =>
 {
     var agent = chatClient.AsAIAgent(
         "you are a helpful assistant that answers questions in a concise and clear manner called fiser.",
         "fiser");
 
-    var response = await agent.RunAsync(message);
+    var result = await agent.RunAsync(message);
 
-    return TypedResults.Ok(response.Text);
+    var response = new CompletionResponse(
+        result.Text,
+#pragma warning disable MEAI001
+        result.Usage?.InputTokenCount ?? 0,
+        result.Usage?.OutputTokenCount ?? 0);
+#pragma warning restore MEAI001
+
+    return TypedResults.Ok(response);
 });
 
 app.Run();
+
+public record CompletionResponse(
+    string Text,
+    long inputToken,
+    long outputToken);

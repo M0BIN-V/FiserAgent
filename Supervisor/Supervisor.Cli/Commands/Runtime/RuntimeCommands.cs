@@ -12,11 +12,14 @@ public class RuntimeCommands : ICommand
         builder.AddSubCommand("runtime", sub =>
         {
             sub.AddCommand("start", async (
-                    [FromService] StartRuntimeHandler handler) =>
+                    [FromService] StartRuntimeHandler handler,
+                    [Option("api-key" , ['a'])] string? apiKey = null,
+                    [Option("endpoint",['e'])] string? endpoint = null,
+                    [Option("model" , ['m'])] string? modelName = null) =>
                 {
-                    var modelName = Input("Model name:");
-                    var apiKey = Input("Api key:");
-                    var endpoint = Input("Endpoint:");
+                    apiKey = apiKey ?? Input("api key:");
+                    endpoint = endpoint ?? Input("endpoint:");
+                    modelName = modelName ?? Input("model name:");
 
                     var result = await handler
                         .HandleAsync(new StartRuntimeRequest(
