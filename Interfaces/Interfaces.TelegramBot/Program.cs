@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Interfaces.Sdk;
+using Interfaces.TelegramBot;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,6 +41,8 @@ builder.Services.AddHostedService<InterfacePipeService>();
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
+
+app.UseTracing();
 
 app.UseUpdateLogging();
 
