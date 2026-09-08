@@ -52,6 +52,12 @@ public static class Message
         AnsiConsole.Write(text);
     }
 
+    public static void WriteLine(string message, Color? color = null)
+    {
+        Write(message, color);
+        Console.WriteLine();
+    }
+
     public static void WriteWithIcon(
         string icon,
         string message,

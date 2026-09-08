@@ -24,7 +24,10 @@ public class StatusCommand : ICommand
 
                 var statusText = status.IsRunning ? "[RUNNING]" : "[NOT RUNNING]";
                 Info("Runtime status:", false);
-                Write($" {statusText}", status.IsRunning ? ConsoleColor.Green : ConsoleColor.Red);
+                WriteLine($" {statusText}", status.IsRunning ? ConsoleColor.Green : ConsoleColor.Red);
+
+                if (status.Endpoint is not null)
+                    Info($"Endpoint : {status.Endpoint}");
             })
             .WithDescription("get the current status of services");
     }
