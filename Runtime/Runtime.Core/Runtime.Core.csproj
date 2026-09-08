@@ -8,8 +8,8 @@
 
     <ItemGroup>
         <PackageReference Include="DiServiceInstaller" Version="2.1.0"/>
-        <PackageReference Include="Microsoft.Agents.AI" Version="1.18.0"/>
-        <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.18.0"/>
+        <PackageReference Include="Microsoft.Agents.AI" Version="1.20.0" />
+        <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.20.0" />
     </ItemGroup>
 
 </Project>
