@@ -15,7 +15,7 @@ public class StartRuntimeHandler(
     Handler<StartRuntimeRequest, StartRuntimeResponse>
 {
     private readonly Channel<string> _output = Channel.CreateUnbounded<string>();
-            
+
     public override async Task<StartRuntimeResponse> HandleAsync(StartRuntimeRequest request,
         CancellationToken ct = default)
     {
@@ -39,6 +39,9 @@ public class StartRuntimeHandler(
 
         var env = new Dictionary<string, string>
         {
+            ["MODELNAME"] = request.ModelName,
+            ["APIKEY"] = request.ApiKey,
+            ["ENDPOINT"] = request.Endpoint,
             ["OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"] = "grpc",
             ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://localhost:4317"
         };

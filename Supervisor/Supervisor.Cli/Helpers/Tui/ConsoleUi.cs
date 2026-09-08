@@ -43,4 +43,9 @@ public static class ConsoleUi
             .Spinner(Spinner.Known.DotsCircle)
             .StartAsync(message, _ => func());
     }
+
+    public static string Input(string title)
+    {
+        return AnsiConsole.Ask<string>(title);
+    }
 }

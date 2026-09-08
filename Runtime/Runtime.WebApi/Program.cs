@@ -1,3 +1,5 @@
+using DiServiceInstaller;
+using Microsoft.Extensions.AI;
 using Runtime.WebApi.Services;
 using Scalar.AspNetCore;
 
@@ -6,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
+
+builder.InstallServices(typeof(Program).Assembly);
 
 builder.Services.AddHostedService<RuntimePipeService>();
 
@@ -18,20 +22,15 @@ app.UseHttpsRedirection();
 
 app.MapDefaultEndpoints();
 
-app.MapPost("completion", (string message) => TypedResults.Ok("your message : " + message));
-
-app.MapPost("test", () =>
+app.MapPost("completion", async (string message, IChatClient chatClient) =>
 {
-    return TypedResults.ServerSentEvents(Events());
+    var agent = chatClient.AsAIAgent(
+        "you are a helpful assistant that answers questions in a concise and clear manner called fiser.",
+        "fiser");
 
-    async IAsyncEnumerable<string> Events()
-    {
-        foreach (var number in Enumerable.Range(1, 200))
-        {
-            yield return $"{number}";
-            await Task.Delay(1000);
-        }
-    }
+    var response = await agent.RunAsync(message);
+
+    return TypedResults.Ok(response.Text);
 });
 
 app.Run();

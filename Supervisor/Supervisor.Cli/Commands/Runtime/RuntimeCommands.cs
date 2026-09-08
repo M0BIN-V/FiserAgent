@@ -14,8 +14,16 @@ public class RuntimeCommands : ICommand
             sub.AddCommand("start", async (
                     [FromService] StartRuntimeHandler handler) =>
                 {
+                    var modelName = Input("Model name:");
+                    var apiKey = Input("Api key:");
+                    var endpoint = Input("Endpoint:");
+
                     var result = await handler
-                        .HandleAsync(new StartRuntimeRequest(), CancellationToken.None);
+                        .HandleAsync(new StartRuntimeRequest(
+                                Endpoint: endpoint,
+                                ApiKey: apiKey,
+                                ModelName: modelName),
+                            CancellationToken.None);
 
                     result.Switch(
                         uri => Success("runtime started"),
