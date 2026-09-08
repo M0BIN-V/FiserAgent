@@ -2,7 +2,6 @@
 using Interfaces.Sdk;
 using Interfaces.Sdk.Extensions;
 using Interfaces.TelegramBot;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TeleFrame.ApplicationBuilder;
@@ -37,12 +36,10 @@ var builder = new TelegramBotBuilder(args);
 
 
 builder.AddServiceDefaults();
-
 builder.Services.AddUpdateLogging();
-
 builder.Services.AddInterfacePipeService();
-
 builder.Services.AddHttpClient();
+builder.Services.AddRuntimeClient(builder.Configuration);
 
 var app = builder.Build();
 
@@ -65,12 +62,8 @@ app.MapCommand("/start", async (UpdateContext context) =>
 
 app.MapMessage(MessageType.Text, async (
     UpdateContext ctx,
-    IConfiguration config,
-    IHttpClientFactory factory) =>
+    RuntimeClient runtimeClient) =>
 {
-    var runtimeEndpoint = config["RUNTIME_ENDPOINT"] ??
-                          throw new NullReferenceException("RUNTIME_ENDPOINT");
-
     var draftId = Random.Shared.Next(1, 9999);
 
     var chatId = ctx.Update.Message!.Chat.Id;
@@ -79,15 +72,10 @@ app.MapMessage(MessageType.Text, async (
         draftId,
         "⌬ Thinking");
 
-    var httpClient = factory.CreateClient();
-    httpClient.BaseAddress = new Uri(runtimeEndpoint);
-
-    var runtimeClient = new RuntimeClient(httpClient);
-
     var message = ctx.Update.Message!.Text;
     var result = await runtimeClient.CompletionAsync(message);
 
-    var text = result.Text ?? "hihi";
+    var text = result.Text ?? "i";
 
     var keyboard = new InlineKeyboardMarkup(
     [
