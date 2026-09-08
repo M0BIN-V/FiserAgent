@@ -1,0 +1,29 @@
+{
+  "runtime": "Net100",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "http://localhost:5000/openapi/v1.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "RuntimeClient",
+      "namespace": "Interfaces.Sdk",
+      "output": "RuntimeClient.cs",
+      "generateClientClasses": true,
+      "generateDtoTypes": true,
+      "injectHttpClient": true,
+      "useHttpClientCreationMethod": false,
+      "httpClientType": "System.Net.Http.HttpClient",
+      "generateOptionalParameters": true,
+      "generateBaseUrlProperty": false,
+      "clientBaseClass": null,
+      "configurationClass": null,
+      "useBaseUrl": false,
+      "responseTypes": true,
+      "throwOnError": false,
+      "generateBearerTokenProperty": true
+    }
+  }
+}
