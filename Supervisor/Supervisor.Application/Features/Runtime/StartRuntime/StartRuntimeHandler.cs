@@ -15,7 +15,7 @@ public class StartRuntimeHandler(
     Handler<StartRuntimeRequest, StartRuntimeResponse>
 {
     private readonly Channel<string> _output = Channel.CreateUnbounded<string>();
-
+            
     public override async Task<StartRuntimeResponse> HandleAsync(StartRuntimeRequest request,
         CancellationToken ct = default)
     {
@@ -46,7 +46,12 @@ public class StartRuntimeHandler(
         var runtimeBinaryPath = runtimeSettings.BinaryPath ??
                                 throw new Exception("Runtime binary path is missing");
 
-        var process = await manager.StartProcess(runtimeBinaryPath, env, OnOutput, OnError, ct);
+        var process = await manager.StartProcess(runtimeBinaryPath,
+            env,
+            onOutput: OnOutput,
+            onError: OnError,
+            ct: ct);
+
         profile.Url = await WaitForEndpointAsync(process, ct);
 
         if (!await manager.IsRunningHealthyAsync(CancellationToken.None))

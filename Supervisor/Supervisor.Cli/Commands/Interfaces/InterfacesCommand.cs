@@ -1,5 +1,8 @@
-﻿using Supervisor.Application.Features.Interfaces.GetList;
+﻿using Supervisor.Application.Features.Interfaces.Configure;
+using Supervisor.Application.Features.Interfaces.GetInstalledInterfaces;
+using Supervisor.Application.Features.Interfaces.GetList;
 using Supervisor.Application.Features.Interfaces.Install;
+using Supervisor.Application.Features.Interfaces.Start;
 using Supervisor.Cli.Helpers.Tui.Components;
 
 namespace Supervisor.Cli.Commands.Interfaces;
@@ -56,6 +59,41 @@ public class InterfacesCommand : ICommand
                         error => Error(error.Message));
                 })
                 .WithDescription("installs interface");
+
+            sub.AddCommand("configure", async (
+                [FromService] GetInstalledInterfacesHandler installedHandler,
+                [FromService] ConfigureInterfaceHandler handler) =>
+            {
+                var selected = await GetInstalledInterfaceName(installedHandler);
+                var result = await handler.HandleAsync(new ConfigureInterfaceRequest(selected));
+            });
+
+            sub.AddCommand("start", async (
+                [FromService] StartInterfacesHandler startHandler,
+                [FromService] GetInstalledInterfacesHandler installedHandler) =>
+            {
+                var selectedUniqueName = await GetInstalledInterfaceName(installedHandler);
+
+                var startRequest = new StartInterfacesRequest(selectedUniqueName);
+                var startResult = await startHandler.HandleAsync(startRequest);
+
+                startResult.Switch(
+                    started => Success("interface started"),
+                    notFound => Error(notFound.Message),
+                    alreadyRunning => Success("already running"),
+                    runtimeIsNotRunning => Error(runtimeIsNotRunning.Message));
+            });
         });
+    }
+
+    private async Task<string> GetInstalledInterfaceName(GetInstalledInterfacesHandler handler)
+    {
+        var installedResult = await handler.HandleAsync(new GetInstalledInterfacesRequest());
+
+        var uniqueNames = installedResult.Interfaces
+            .Select(i => i.UniqueName)
+            .ToList();
+
+        return Select("select interface:", uniqueNames);
     }
 }

@@ -4,12 +4,15 @@ namespace Supervisor.Domain.Entities;
 
 public class InterfaceManifest
 {
-    [JsonPropertyName("uniqueName")] public required string UniqueName { get; set; }
+    [JsonPropertyName("unique-name")] public required string UniqueName { get; set; }
 
     [JsonPropertyName("name")] public required string Name { get; set; }
 
-    [JsonPropertyName("requiredRuntimeVersion")]
-    public required Version RequiredRuntimeVersion { get; set; }
+    [JsonPropertyName("minimum-runtime-version")]
+    public required Version MinimumRuntimeVersion { get; set; }
 
     [JsonPropertyName("version")] public required Version Version { get; set; }
+    
+    [JsonPropertyName("binary-file-name")]
+    public required string BinaryFileName { get; set; }
 }

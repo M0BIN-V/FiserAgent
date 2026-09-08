@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Supervisor.Application.Common.Contracts.Process;
 using Supervisor.Application.Common.Extensions;
 using Supervisor.Application.Common.Settings;
+using Supervisor.Application.Features.Interfaces.Start;
 using Supervisor.Application.Features.Runtime.Shutdown;
 using Supervisor.Application.Services;
 using Supervisor.Application.Services.Process;
@@ -31,6 +32,9 @@ public static class ServiceInstaller
         services.AddSingleton<RuntimeSettings>();
         services.AddSingleton<InterfacesSettings>();
         services.AddSingleton<SupervisorSettings>();
+
+        services.AddScoped<IInterfaceService, InterfaceService>();
+        services.AddSingleton<ForegroundProcessRunner>();
 
         services.AddSingleton<IPipeClient, PipeClient>();
         services.AddScoped<RuntimeProfileService>();

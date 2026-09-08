@@ -6,7 +6,7 @@ public class InterfacesSettings(SupervisorSettings supervisorSettings)
     public readonly string ManifestFileName = "manifest.json";
     public readonly string ProcessProfileFileName = "process.profile.json";
 
-    public string GenerateInstallationDirectory(string uniqueName)
+    public string GenerateInstallationPath(string uniqueName)
     {
         return Path.Combine(InstallationDirectory, uniqueName);
     }

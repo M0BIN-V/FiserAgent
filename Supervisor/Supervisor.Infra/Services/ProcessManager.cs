@@ -47,6 +47,7 @@ public sealed class ProcessManager(
     public async Task<Process> StartProcess(
         string filePath,
         Dictionary<string, string> environmentVariables,
+        List<string>? args = null,
         DataReceivedEventHandler? onOutput = null,
         DataReceivedEventHandler? onError = null,
         CancellationToken ct = default)
@@ -54,7 +55,7 @@ public sealed class ProcessManager(
         if (await IsRunningHealthyAsync(ct))
             throw new InvalidOperationException("Process is already running.");
 
-        var process = InitProcess(filePath, environmentVariables);
+        var process = InitProcess(filePath, environmentVariables, args ?? []);
 
         process.OutputDataReceived += onOutput;
         process.ErrorDataReceived += onError;
@@ -104,7 +105,8 @@ public sealed class ProcessManager(
 
     private Process InitProcess(
         string filePath,
-        Dictionary<string, string> environmentVariables)
+        Dictionary<string, string> environmentVariables,
+        List<string> args)
     {
         environmentVariables.Add("SUPERVISOR_PIPE_NAME", profile.PipeName);
 
@@ -116,6 +118,8 @@ public sealed class ProcessManager(
             RedirectStandardError = true,
             CreateNoWindow = true
         };
+
+        args.ForEach(a => startInfo.ArgumentList.Add(a));
 
         foreach (var keyValuePair in environmentVariables) startInfo.Environment[keyValuePair.Key] = keyValuePair.Value;
 

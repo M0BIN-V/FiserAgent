@@ -9,6 +9,7 @@ public interface IProcessManager
     public Task<System.Diagnostics.Process> StartProcess(
         string filePath,
         Dictionary<string, string> environmentVariables,
+        List<string>? args = null,
         DataReceivedEventHandler? onOutput = null,
         DataReceivedEventHandler? onError = null,
         CancellationToken ct = default);

@@ -1,4 +1,5 @@
-﻿using Interfaces.TelegramBot;
+﻿using System.Text.Json;
+using Interfaces.TelegramBot;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +9,29 @@ using TeleFrame.UpdateHandlers.MessageHandlers;
 using TeleFrame.UpdateHandlers.MessageHandlers.CommandHandlers;
 using Telegram.Bot.Types.Enums;
 
+if (args.Any(a => a.Trim().Equals("--configure")))
+{
+    Console.Write("enter your bot token: ");
+    var token = Console.ReadLine();
+
+    var config = new
+    {
+        Token = token
+    };
+
+    var jsonConfig = JsonSerializer.Serialize(config);
+
+    var configPath = Path.Combine(AppContext.BaseDirectory, "botConfig.json");
+
+    await File.WriteAllTextAsync(configPath, jsonConfig);
+
+    return;
+}
+
 var builder = new TelegramBotBuilder(args);
+
+
+builder.AddServiceDefaults();
 
 builder.Services.AddUpdateLogging();
 

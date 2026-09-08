@@ -13,19 +13,17 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
     private readonly string _interfacesBuildDirectoryPath;
     private readonly InterfacesSettings _interfacesSettings;
     private readonly ILogger<DebugInterfaceRegistry> _logger;
-    private readonly SupervisorSettings _settings;
 
     public DebugInterfaceRegistry(
         SupervisorSettings settings,
         ILogger<DebugInterfaceRegistry> logger,
         InterfacesSettings interfacesSettings)
     {
-        _settings = settings;
         _logger = logger;
         _interfacesSettings = interfacesSettings;
 
         _interfacesBuildDirectoryPath = Path.Combine(
-            _settings.SupervisorProjectPath,
+            settings.SupervisorProjectPath,
             "..",
             "..",
             "Interfaces");
@@ -61,7 +59,7 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
 
         return interfaces.SingleOrDefault(i =>
             i.Version == interfaceVersion &&
-            i.RequiredRuntimeVersion <= runtimeVersion &&
+            i.MinimumRuntimeVersion <= runtimeVersion &&
             i.UniqueName.Equals(uniqueName, StringComparison.CurrentCultureIgnoreCase));
     }
 
@@ -71,7 +69,7 @@ public class DebugInterfaceRegistry : IInterfaceRegistry
 
         await FileHelpers.CopyDirectoryAsync(
             buildDirectory,
-            _interfacesSettings.GenerateInstallationDirectory(uniqueName),
+            _interfacesSettings.GenerateInstallationPath(uniqueName),
             progress);
     }
 
