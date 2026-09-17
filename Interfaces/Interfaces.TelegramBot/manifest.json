@@ -2,6 +2,6 @@
   "unique-name": "Interfaces.TelegramBot",
   "name": "Telegram Bot",
   "minimum-runtime-version": "0.0.4",
-  "version": "0.0.3",
+  "version": "0.0.12",
   "binary-file-name": "Interfaces.TelegramBot"
 }

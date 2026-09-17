@@ -1,0 +1,1 @@
+﻿public record CompletionRequest(string Text);
