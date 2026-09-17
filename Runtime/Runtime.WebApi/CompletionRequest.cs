@@ -1,1 +1,3 @@
-﻿public record CompletionRequest(string Text);
+﻿namespace Runtime.WebApi;
+
+public record CompletionRequest(string Text);

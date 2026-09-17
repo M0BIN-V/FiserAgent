@@ -26,7 +26,7 @@ public class DebugRuntimeRegistry : IRuntimeRegistry
             "Runtime.WebApi",
             "bin",
             "Debug",
-            "net10.0");
+            "net10.0-windows10.0.19041.0");
     }
 
     public async Task<Version> GetLatestRuntimeVersionAsync()

@@ -8,6 +8,13 @@ public static class ToolInstaller
     {
         options.Tools =
         [
+            AIFunctionFactory.Create(MediaTools.GetMediaStatus),
+            AIFunctionFactory.Create(MediaTools.NextMedia),
+            AIFunctionFactory.Create(MediaTools.PauseMedia),
+            AIFunctionFactory.Create(MediaTools.PlayMedia),
+            AIFunctionFactory.Create(MediaTools.PreviousMedia),
+            AIFunctionFactory.Create(MediaTools.ToggleMedia),
+
             AIFunctionFactory.Create(SystemBrightnessTools.DecreaseBrightness),
             AIFunctionFactory.Create(SystemBrightnessTools.IncreaseBrightness),
             AIFunctionFactory.Create(SystemBrightnessTools.SetBrightness),
