@@ -1,8 +1,9 @@
 ﻿using Windows.Media.Control;
+using Runtime.Application.Common.Abstractions;
 
-namespace Runtime.WebApi.Tools;
+namespace Runtime.Application.Common.Services;
 
-public sealed class WindowsMediaController
+public class WindowsMediaService : ITool
 {
     private async Task<GlobalSystemMediaTransportControlsSession?> GetCurrentSessionAsync()
     {

@@ -1,4 +1,6 @@
-﻿public enum ChatEventType
+﻿namespace Runtime.Application.Models;
+
+public enum ChatEventType
 {
     Text = 0,
     ToolCall = 1,

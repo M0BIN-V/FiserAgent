@@ -23,7 +23,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\ServiceDefaults\ServiceDefaults.csproj"/>
-        <ProjectReference Include="..\Runtime.Core\Runtime.Core.csproj" />
+        <ProjectReference Include="..\Runtime.Application\Runtime.Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>

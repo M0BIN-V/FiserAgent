@@ -1,10 +1,12 @@
 ﻿using System.ClientModel;
 using DiServiceInstaller;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OpenAI;
 using OpenAI.Chat;
 
-namespace Runtime.WebApi.ServiceInstallers;
+namespace Runtime.Application.Installers;
 
 public class ChatClientServiceInstaller : IServiceInstaller
 {

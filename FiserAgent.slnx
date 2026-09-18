@@ -4,9 +4,8 @@
         <Project Path="Interfaces/Interfaces.TelegramBot/Interfaces.TelegramBot.csproj" />
     </Folder>
     <Folder Name="/Runtime/">
-        <Project Path="Runtime/Runtime.Core/Runtime.Core.csproj" />
+        <Project Path="Runtime/Runtime.Application/Runtime.Application.csproj" />
         <Project Path="Runtime/Runtime.WebApi/Runtime.WebApi.csproj" />
-        <Project Path="Runtime/TMPTest/TMPTest.csproj" />
     </Folder>
     <Folder Name="/Solution items/">
         <File Path=".gitignore" />

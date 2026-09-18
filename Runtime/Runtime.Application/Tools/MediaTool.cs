@@ -1,13 +1,15 @@
 ﻿using System.ComponentModel;
+using Runtime.Application.Common.Abstractions;
+using Runtime.Application.Common.Services;
 
-namespace Runtime.WebApi.Tools;
+namespace Runtime.Application.Tools;
 
-public static class MediaTools
+public class MediaTools(WindowsMediaService mediaService) : ITool
 {
     [Description("Pauses the currently playing music or video on the computer.")]
-    public static async Task<string> PauseMedia()
+    public async Task<string> PauseMedia()
     {
-        var success = await new WindowsMediaController().PauseAsync();
+        var success = await mediaService.PauseAsync();
 
         return success
             ? "Media paused."
@@ -15,9 +17,9 @@ public static class MediaTools
     }
 
     [Description("Starts or resumes the currently paused music or video on the computer.")]
-    public static async Task<string> PlayMedia()
+    public async Task<string> PlayMedia()
     {
-        var success = await new WindowsMediaController().PlayAsync();
+        var success = await mediaService.PlayAsync();
 
         return success
             ? "Media started."
@@ -25,9 +27,9 @@ public static class MediaTools
     }
 
     [Description("Toggles the currently playing media between play and pause.")]
-    public static async Task<string> ToggleMedia()
+    public async Task<string> ToggleMedia()
     {
-        var success = await new WindowsMediaController().ToggleAsync();
+        var success = await mediaService.ToggleAsync();
 
         return success
             ? "Media playback toggled."
@@ -35,9 +37,9 @@ public static class MediaTools
     }
 
     [Description("Skips to the next track or media item in the currently active media session.")]
-    public static async Task<string> NextMedia()
+    public async Task<string> NextMedia()
     {
-        var success = await new WindowsMediaController().NextAsync();
+        var success = await mediaService.NextAsync();
 
         return success
             ? "Skipped to the next media item."
@@ -45,9 +47,9 @@ public static class MediaTools
     }
 
     [Description("Goes back to the previous track or media item in the currently active media session.")]
-    public static async Task<string> PreviousMedia()
+    public async Task<string> PreviousMedia()
     {
-        var success = await new WindowsMediaController().PreviousAsync();
+        var success = await mediaService.PreviousAsync();
 
         return success
             ? "Moved to the previous media item."
@@ -56,8 +58,8 @@ public static class MediaTools
 
     [Description(
         "Gets information about the currently active music or video, including title, artist, album and playback state.")]
-    public static async Task<MediaStatus?> GetMediaStatus()
+    public async Task<MediaStatus?> GetMediaStatus()
     {
-        return await new WindowsMediaController().GetStatusAsync();
+        return await mediaService.GetStatusAsync();
     }
 }

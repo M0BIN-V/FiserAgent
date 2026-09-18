@@ -1,8 +1,8 @@
-﻿namespace Runtime.WebApi;
+﻿namespace Runtime.Application.Models;
 
-public class CompletionResponse
+public class CompleteChatResponse
 {
-    private CompletionResponse()
+    private CompleteChatResponse()
     {
     }
 
@@ -13,18 +13,18 @@ public class CompletionResponse
     public ChatEventType Type { get; private set; }
 
 
-    public static CompletionResponse CreateText(string text)
+    public static CompleteChatResponse CreateText(string text)
     {
-        return new CompletionResponse
+        return new CompleteChatResponse
         {
             Text = text,
             Type = ChatEventType.Text
         };
     }
 
-    public static CompletionResponse CreateToolCall(string name, string viewName)
+    public static CompleteChatResponse CreateToolCall(string name, string viewName)
     {
-        return new CompletionResponse
+        return new CompleteChatResponse
         {
             ToolName = name,
             ToolViewName = viewName,
@@ -32,17 +32,17 @@ public class CompletionResponse
         };
     }
 
-    public static CompletionResponse CreateCompleted()
+    public static CompleteChatResponse CreateCompleted()
     {
-        return new CompletionResponse
+        return new CompleteChatResponse
         {
             Type = ChatEventType.Completed
         };
     }
 
-    public static CompletionResponse CreateToolResult(object result)
+    public static CompleteChatResponse CreateToolResult(object result)
     {
-        return new CompletionResponse
+        return new CompleteChatResponse
         {
             ToolResult = result,
             Type = ChatEventType.ToolResult

@@ -1,6 +1,6 @@
 ﻿using System.Management;
 
-namespace Runtime.WebApi.Tools;
+namespace Runtime.Application.Services;
 
 public sealed class SystemBrightnessService
 {

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TeleFrame.ApplicationBuilder;
 using TeleFrame.Middlewares;
+using TeleFrame.Results;
 using TeleFrame.Services;
 using TeleFrame.UpdateHandlers.MessageHandlers;
 using TeleFrame.UpdateHandlers.MessageHandlers.CommandHandlers;
@@ -62,9 +63,22 @@ app.MapCommand("/start", async (UpdateContext context) =>
     );
 });
 
+app.MapCommand("/new", async (UpdateContext context) =>
+{
+    var bot = context.Client;
+    var chatId = context.Update.Message!.Chat.Id;
+
+    var topic = await bot.CreateForumTopic(
+        chatId,
+        Guid.CreateVersion7().ToString());
+
+    await Results.Reply($"Topic created :{topic.Name}")
+        .InvokeAsync(context);
+});
+
 
 app.MapMessage(MessageType.Text, async (
-    ILogger<CompletionRequest> logger,
+    ILogger<CompleteChatRequest> logger,
     UpdateContext ctx,
     IHttpClientFactory clientFactory,
     CancellationToken cancellationToken) =>
@@ -74,17 +88,19 @@ app.MapMessage(MessageType.Text, async (
     var message = ctx.Update.Message;
     var chatId = message!.Chat.Id;
     var draftId = Random.Shared.Next(1, int.MaxValue);
+    var threadId = message.MessageThreadId;
 
     var httpClient = clientFactory.CreateClient(ServiceCollectionExtensions.RuntimeHttpClientName);
     var request = new HttpRequestMessage(HttpMethod.Post, "/completion")
     {
-        Content = JsonContent.Create(new CompletionRequest
+        Content = JsonContent.Create(new CompleteChatRequest
         {
-            Text = message.Text
+            Message = message.Text,
+            SessionId = Guid.NewGuid()
         })
     };
 
-    await DraftSender.SendDraftWithRetryAsync(ctx, chatId, draftId, "⌬ Thinking", cancellationToken);
+    await DraftSender.SendDraftWithRetryAsync(ctx, chatId, draftId, "⌬ Thinking", threadId, cancellationToken);
 
     var renderer = new TelegramMarkdownV2Renderer();
 
@@ -105,12 +121,14 @@ app.MapMessage(MessageType.Text, async (
 
     await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
     var parser = SseParser.Create(stream,
-        (_, data) => JsonSerializer.Deserialize<CompletionResponse>(data, jsonOptions)!);
+        (_, data) => JsonSerializer.Deserialize<CompleteChatResponse>(data, jsonOptions)!);
     var fullText = string.Empty;
 
-    var draftUpdater = new DraftUpdater(ctx, chatId, draftId, TimeSpan.FromMilliseconds(400));
+    var draftUpdater = new DraftUpdater(ctx, chatId, draftId, TimeSpan.FromMilliseconds(400), threadId);
 
     logger.LogInformation("reading event items");
+    var toolCalls = new List<string>();
+
     await foreach (var item in parser.EnumerateAsync(cancellationToken))
     {
         var completion = item.Data;
@@ -121,14 +139,13 @@ app.MapMessage(MessageType.Text, async (
             {
                 logger.LogInformation("tool call event received");
 
-                if (string.IsNullOrWhiteSpace(completion.ToolViewName))
-                    continue;
+                if (string.IsNullOrWhiteSpace(completion.ToolViewName)) continue;
 
-                var toolName =
-                    TelegramMarkdownV2Renderer.RenderInlineCode(
-                        completion.ToolViewName);
+                toolCalls.Add(completion.ToolViewName);
 
-                var toolText = $"⌬ Calling {toolName}\\.\\.\\.";
+                var toolName = TelegramMarkdownV2Renderer.RenderInlineCode(completion.ToolViewName);
+
+                var toolText = $"⌬ Calling {toolName}";
 
                 await draftUpdater.FlushAsync(cancellationToken);
 
@@ -137,13 +154,14 @@ app.MapMessage(MessageType.Text, async (
                     chatId,
                     draftId,
                     toolText,
+                    threadId,
                     cancellationToken);
 
                 break;
             }
             case ChatEventType.Text:
             {
-                logger.LogInformation($"text event received : {completion.Text}");
+                logger.LogInformation("text event received");
                 if (string.IsNullOrEmpty(completion.Text)) continue;
                 fullText += completion.Text;
                 var renderedText = renderer.Render(fullText);
@@ -170,8 +188,15 @@ app.MapMessage(MessageType.Text, async (
     if (!string.IsNullOrWhiteSpace(fullText))
     {
         var finalText = renderer.Render(fullText);
+
         if (!string.IsNullOrWhiteSpace(finalText))
-            await DraftSender.SendMessageWithRetryAsync(ctx, chatId, finalText, cancellationToken);
+            await DraftSender.SendMessageWithRetryAsync(
+                ctx,
+                chatId,
+                finalText,
+                threadId,
+                toolCalls,
+                cancellationToken);
     }
 });
 
